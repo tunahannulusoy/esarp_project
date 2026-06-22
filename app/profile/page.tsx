@@ -4,20 +4,25 @@ import { useState } from "react";
 import { useProfile } from "@/app/lib/profile-context";
 
 export default function ProfilePage() {
-  const { profil, profilGuncelle } = useProfile();
+  const { profil, profilGuncelle, yukleniyor } = useProfile();
   const [duzenleniyor, setDuzenleniyor] = useState(false);
+  const [kaydediliyor, setKaydediliyor] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setKaydediliyor(true);
     const fd = new FormData(e.currentTarget);
-    profilGuncelle({
+    await profilGuncelle({
       ad: fd.get("ad") as string,
       soyad: fd.get("soyad") as string,
-      email: fd.get("email") as string,
+      email: profil.email,
       telefon: fd.get("telefon") as string,
     });
+    setKaydediliyor(false);
     setDuzenleniyor(false);
   };
+
+  if (yukleniyor) return null;
 
   if (duzenleniyor) {
     return (
@@ -55,12 +60,11 @@ export default function ProfilePage() {
           </label>
           <input
             id="email"
-            name="email"
-            type="email"
-            defaultValue={profil.email}
-            required
-            className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
+            value={profil.email}
+            disabled
+            className="mt-1 w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-500"
           />
+          <p className="mt-1 text-xs text-stone-500">Email değiştirmek için Hesap Ayarları sayfasını kullanın.</p>
         </div>
 
         <div>
@@ -79,9 +83,10 @@ export default function ProfilePage() {
         <div className="flex gap-3">
           <button
             type="submit"
-            className="rounded-lg bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700"
+            disabled={kaydediliyor}
+            className="rounded-lg bg-stone-900 px-4 py-2 text-sm font-medium text-white hover:bg-stone-700 disabled:opacity-50"
           >
-            Kaydet
+            {kaydediliyor ? "Kaydediliyor..." : "Kaydet"}
           </button>
           <button
             type="button"

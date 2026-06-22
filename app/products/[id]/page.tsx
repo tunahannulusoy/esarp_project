@@ -1,15 +1,17 @@
 import { notFound } from "next/navigation";
-import { ilgiliUrunleriGetir, urunGetir } from "@/app/lib/mock-data";
+import { getPublicProductById, getPublicProducts } from "@/app/actions/products-public";
+import { ilgiliUrunleriGetir } from "@/app/lib/urun-data";
 import ProductDetailClient from "./product-detail-client";
 import ProductCard from "@/app/components/product-card";
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const urun = urunGetir(id);
+  const urun = await getPublicProductById(id);
 
   if (!urun) notFound();
 
-  const ilgiliUrunler = ilgiliUrunleriGetir(urun);
+  const tumUrunler = await getPublicProducts();
+  const ilgiliUrunler = ilgiliUrunleriGetir(urun, tumUrunler);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">

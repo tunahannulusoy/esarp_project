@@ -5,11 +5,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/app/lib/cart-context";
 import { useAddresses } from "@/app/lib/address-context";
-import { indirimliFiyatHesapla, urunGetir } from "@/app/lib/mock-data";
+import { indirimliFiyatHesapla } from "@/app/lib/mock-data";
+import { useUrunler } from "@/app/lib/use-urunler";
 import { fiyatFormatla } from "@/app/lib/utils";
 import { kargoUcretiHesapla, tahminiTeslimatGunSayisiHesapla } from "@/app/lib/turkiye-iller";
-import { siparisOlustur } from "@/app/lib/orders";
-import { siparisOlusturulduBildirimGonder } from "@/app/actions/orders";
+import { createOrder, siparisOlusturulduBildirimGonder } from "@/app/actions/orders";
 import AddressForm from "@/app/components/address-form";
 import { useSession } from "@/app/lib/use-session";
 import SignInModal from "@/app/components/sign-in-modal";
@@ -19,8 +19,9 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { items, sepetiTemizle } = useCart();
   const { adresler, adresEkle } = useAddresses();
-  const { girisYapilmis, yukleniyor, user } = useSession();
+  const { girisYapilmis, yukleniyor } = useSession();
   const { profil, profilGuncelle } = useProfile();
+  const { urunGetir } = useUrunler();
 
   const [seciliAdresId, setSeciliAdresId] = useState<string | null>(
     adresler.find((a) => a.varsayilan)?.id ?? adresler[0]?.id ?? null
@@ -44,7 +45,7 @@ export default function CheckoutPage() {
           return urun ? { ...item, urun } : null;
         })
         .filter((o): o is NonNullable<typeof o> => o !== null),
-    [items]
+    [items, urunGetir]
   );
 
   const seciliAdres = adresler.find((a) => a.id === seciliAdresId) ?? null;
@@ -59,7 +60,7 @@ export default function CheckoutPage() {
 
   const adGecerliMi = ad.trim().length > 0 && soyad.trim().length > 0;
 
-  const handleSiparisOlustur = () => {
+  const handleSiparisOlustur = async () => {
     if (!seciliAdres || sepetOgeleri.length === 0) return;
 
     if (!adGecerliMi) {
@@ -70,14 +71,30 @@ export default function CheckoutPage() {
 
     setGonderiliyor(true);
     const musteriAdiSoyadi = `${ad.trim()} ${soyad.trim()}`;
-    profilGuncelle({ ...profil, ad: ad.trim(), soyad: soyad.trim() });
-    const siparis = siparisOlustur(sepetOgeleri, seciliAdres, musteriAdiSoyadi, user?.email ?? null);
+    await profilGuncelle({ ...profil, ad: ad.trim(), soyad: soyad.trim() });
+
+    const siparisUrunleri = sepetOgeleri.map((oge) => ({
+      urun_id: oge.urun_id,
+      adet: oge.adet,
+      fiyat: indirimliFiyatHesapla(oge.urun.fiyat, oge.urun.indirim_orani),
+      secili_renk: oge.secili_renk,
+      secili_boyut: oge.secili_boyut,
+    }));
+
+    const sonuc = await createOrder(siparisUrunleri, seciliAdres.id, musteriAdiSoyadi);
+
+    if (!sonuc.success || !sonuc.siparis) {
+      setAdHata(sonuc.message ?? "Sipariş oluşturulamadı, lütfen tekrar deneyin.");
+      setGonderiliyor(false);
+      return;
+    }
+
     sepetiTemizle();
 
     const adresMetni = `${seciliAdres.acik_adres}, ${seciliAdres.mahalle}, ${seciliAdres.ilce}/${seciliAdres.il}`;
-    siparisOlusturulduBildirimGonder(siparis, adresMetni);
+    siparisOlusturulduBildirimGonder(sonuc.siparis, adresMetni);
 
-    router.push(`/checkout/confirmation?id=${siparis.id}`);
+    router.push(`/checkout/confirmation?id=${sonuc.siparis.id}`);
   };
 
   if (sepetOgeleri.length === 0) {
@@ -188,9 +205,9 @@ export default function CheckoutPage() {
                 <AddressForm
                   varsayilanOner={adresler.length > 0}
                   onVazgec={adresler.length > 0 ? () => setFormAcik(false) : undefined}
-                  onKaydet={(veri) => {
-                    const yeniAdres = adresEkle({ ...veri, varsayilan: veri.varsayilan || adresler.length === 0 });
-                    setSeciliAdresId(yeniAdres.id);
+                  onKaydet={async (veri) => {
+                    const yeniAdres = await adresEkle({ ...veri, varsayilan: veri.varsayilan || adresler.length === 0 });
+                    if (yeniAdres) setSeciliAdresId(yeniAdres.id);
                     setFormAcik(false);
                   }}
                 />

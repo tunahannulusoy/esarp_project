@@ -38,8 +38,8 @@ export default function AddressesPage() {
               varsayilanOner
               baslangicDeger={adres}
               onVazgec={() => setDuzenlenenId(null)}
-              onKaydet={(veri) => {
-                adresGuncelle(adres.id, veri);
+              onKaydet={async (veri) => {
+                await adresGuncelle(adres.id, veri);
                 setDuzenlenenId(null);
               }}
             />
@@ -92,8 +92,8 @@ export default function AddressesPage() {
           <AddressForm
             varsayilanOner={adresler.length > 0}
             onVazgec={() => setFormAcik(false)}
-            onKaydet={(veri) => {
-              adresEkle({ ...veri, varsayilan: veri.varsayilan || adresler.length === 0 });
+            onKaydet={async (veri) => {
+              await adresEkle({ ...veri, varsayilan: veri.varsayilan || adresler.length === 0 });
               setFormAcik(false);
             }}
           />

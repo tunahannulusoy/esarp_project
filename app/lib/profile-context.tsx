@@ -1,15 +1,10 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
+import { getProfile, updateProfile, type ProfilBilgisi } from "@/app/actions/users";
 
-const STORAGE_KEY = "esarp_profil";
-
-export type ProfilBilgisi = {
-  ad: string;
-  soyad: string;
-  email: string;
-  telefon: string;
-};
+export type { ProfilBilgisi };
 
 export const VARSAYILAN_PROFIL: ProfilBilgisi = {
   ad: "",
@@ -20,32 +15,42 @@ export const VARSAYILAN_PROFIL: ProfilBilgisi = {
 
 type ProfileContextValue = {
   profil: ProfilBilgisi;
-  profilGuncelle: (veri: ProfilBilgisi) => void;
+  profilGuncelle: (veri: ProfilBilgisi) => Promise<void>;
+  yukleniyor: boolean;
 };
 
 const ProfileContext = createContext<ProfileContextValue | null>(null);
 
 export function ProfileProvider({ children }: { children: React.ReactNode }) {
   const [profil, setProfil] = useState<ProfilBilgisi>(VARSAYILAN_PROFIL);
-  const [yuklendi, setYuklendi] = useState(false);
+  const [yukleniyor, setYukleniyor] = useState(true);
+  const pathname = usePathname();
 
   useEffect(() => {
-    try {
-      const ham = localStorage.getItem(STORAGE_KEY);
-      if (ham) setProfil(JSON.parse(ham));
-    } catch {
-      // localStorage erişilemezse varsayılan profille devam et
-    } finally {
-      setYuklendi(true);
-    }
+    let iptalEdildi = false;
+
+    getProfile().then((veri) => {
+      if (iptalEdildi) return;
+      setProfil(veri ?? VARSAYILAN_PROFIL);
+      setYukleniyor(false);
+    });
+
+    return () => {
+      iptalEdildi = true;
+    };
+  }, [pathname]);
+
+  const profilGuncelle = useCallback(async (veri: ProfilBilgisi) => {
+    setProfil(veri);
+
+    const fd = new FormData();
+    fd.set("ad", veri.ad);
+    fd.set("soyad", veri.soyad);
+    fd.set("telefon", veri.telefon);
+    await updateProfile(fd);
   }, []);
 
-  useEffect(() => {
-    if (!yuklendi) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(profil));
-  }, [profil, yuklendi]);
-
-  const value = useMemo(() => ({ profil, profilGuncelle: setProfil }), [profil]);
+  const value = useMemo(() => ({ profil, profilGuncelle, yukleniyor }), [profil, profilGuncelle, yukleniyor]);
 
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
 }

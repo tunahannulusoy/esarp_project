@@ -1,11 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import type { Urun, UrunResim } from "@/app/types";
+import { useEffect, useState } from "react";
+import type { Kategori, Urun, UrunResim } from "@/app/types";
 import { productSchema } from "@/app/lib/validation";
-import { adminKategorileriGetir } from "@/app/lib/admin-categories";
-import { yeniUrunIdOlustur } from "@/app/lib/admin-products";
+import { getAdminCategories } from "@/app/actions/categories";
 import { urunResmiYukle } from "@/app/actions/upload";
 
 type ProductFormProps = {
@@ -21,7 +20,7 @@ type ProductFormProps = {
     boyutlar: string[];
     stok: number;
     resim_linkler?: UrunResim[];
-  }) => void;
+  }) => Promise<{ success: boolean; message?: string }>;
 };
 
 const BOYUT_SECENEKLERI = ["XS", "S", "M", "L", "XL", "XXL", "90x90", "70x180", "Standart"];
@@ -30,16 +29,20 @@ const SUPABASE_YAPILANDIRILMIS =
 
 export default function ProductForm({ baslangicDeger, onKaydet }: ProductFormProps) {
   const router = useRouter();
-  const kategoriler = adminKategorileriGetir();
+  const [kategoriler, setKategoriler] = useState<Kategori[]>([]);
   const [hata, setHata] = useState<string | null>(null);
   const [kaydediliyor, setKaydediliyor] = useState(false);
   const [secilenBoyutlar, setSecilenBoyutlar] = useState<string[]>(baslangicDeger?.boyutlar ?? []);
   const [renkler, setRenkler] = useState(baslangicDeger?.renkler ?? [{ ad: "", hex: "#000000" }]);
-  const [urunId] = useState(() => baslangicDeger?.id ?? yeniUrunIdOlustur());
+  const [urunId] = useState(() => baslangicDeger?.id ?? crypto.randomUUID());
   const [secilenDosyalar, setSecilenDosyalar] = useState<(File | null)[]>([null, null, null, null]);
   const [onizlemeler, setOnizlemeler] = useState<(string | null)[]>(
     [1, 2, 3, 4].map((sira) => baslangicDeger?.resim_linkler.find((r) => r.sira === sira)?.url ?? null)
   );
+
+  useEffect(() => {
+    getAdminCategories().then(setKategoriler);
+  }, []);
 
   const boyutToggle = (boyut: string) => {
     setSecilenBoyutlar((mevcut) =>
@@ -116,12 +119,19 @@ export default function ProductForm({ baslangicDeger, onKaydet }: ProductFormPro
       }
     }
 
-    onKaydet({
+    const sonuc = await onKaydet({
       id: urunId,
       ...parsed.data,
       renkler: gecerliRenkler,
       ...(resim_linkler ? { resim_linkler } : {}),
     });
+
+    if (!sonuc.success) {
+      setHata(sonuc.message ?? "Ürün kaydedilemedi");
+      setKaydediliyor(false);
+      return;
+    }
+
     router.push("/admin/products");
   };
 

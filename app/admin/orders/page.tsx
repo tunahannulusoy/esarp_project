@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Siparis } from "@/app/types";
-import { kullaniciSiparisleriGetir } from "@/app/lib/orders";
+import { getAllOrdersAdmin } from "@/app/actions/orders";
 import { fiyatFormatla } from "@/app/lib/utils";
 
 const DURUM_RENGI: Record<Siparis["durum"], string> = {
@@ -18,7 +18,7 @@ export default function AdminOrdersPage() {
   const [siparisler, setSiparisler] = useState<Siparis[]>([]);
 
   useEffect(() => {
-    setSiparisler(kullaniciSiparisleriGetir());
+    getAllOrdersAdmin().then(setSiparisler);
   }, []);
 
   return (

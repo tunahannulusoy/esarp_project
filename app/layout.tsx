@@ -8,6 +8,7 @@ import { AddressProvider } from "@/app/lib/address-context";
 import { FavoritesProvider } from "@/app/lib/favorites-context";
 import { ProfileProvider } from "@/app/lib/profile-context";
 import CartSessionSync from "@/app/components/cart-session-sync";
+import FavoritesSessionSync from "@/app/components/favorites-session-sync";
 import GoogleAnalytics from "@/app/components/google-analytics";
 
 const geistSans = Geist({
@@ -39,6 +40,7 @@ export default function RootLayout({
             <FavoritesProvider>
               <ProfileProvider>
                 <CartSessionSync />
+                <FavoritesSessionSync />
                 <Header />
                 <main className="flex-1">{children}</main>
                 <Footer />

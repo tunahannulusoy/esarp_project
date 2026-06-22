@@ -2,9 +2,8 @@
 
 import { use, useEffect, useState } from "react";
 import type { Siparis } from "@/app/types";
-import { siparisDurumGuncelle, siparisGetir } from "@/app/lib/orders";
-import { siparisDurumBildirimGonder } from "@/app/actions/orders";
-import { urunGetir } from "@/app/lib/mock-data";
+import { getOrderById, siparisDurumBildirimGonder, updateOrderStatus } from "@/app/actions/orders";
+import { useUrunler } from "@/app/lib/use-urunler";
 import { fiyatFormatla } from "@/app/lib/utils";
 
 const DURUMLAR: Siparis["durum"][] = [
@@ -18,17 +17,17 @@ const DURUMLAR: Siparis["durum"][] = [
 export default function AdminOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [siparis, setSiparis] = useState<Siparis | null | undefined>(undefined);
+  const { urunGetir } = useUrunler();
 
   useEffect(() => {
-    setSiparis(siparisGetir(id) ?? null);
+    getOrderById(id).then((veri) => setSiparis(veri));
   }, [id]);
 
-  const handleDurumDegistir = (durum: Siparis["durum"]) => {
-    siparisDurumGuncelle(id, durum);
-    const guncellenmis = siparisGetir(id) ?? null;
-    setSiparis(guncellenmis);
-    if (guncellenmis) {
-      siparisDurumBildirimGonder(guncellenmis.musteri_email, guncellenmis.siparis_no, durum);
+  const handleDurumDegistir = async (durum: Siparis["durum"]) => {
+    const sonuc = await updateOrderStatus(id, durum);
+    if (sonuc.success && sonuc.siparis) {
+      setSiparis(sonuc.siparis);
+      siparisDurumBildirimGonder(sonuc.siparis.musteri_email, sonuc.siparis.siparis_no, durum);
     }
   };
 

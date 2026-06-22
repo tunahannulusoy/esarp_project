@@ -1,5 +1,5 @@
 import type { SiralamaSecenegi, Urun } from "@/app/types";
-import { indirimliFiyatHesapla, mockKategoriler } from "@/app/lib/mock-data";
+import { indirimliFiyatHesapla } from "@/app/lib/mock-data";
 
 export type UrunFiltreleri = {
   q?: string;
@@ -81,6 +81,3 @@ export function tumBoyutlariGetir(urunler: Urun[]) {
   return Array.from(boyutSeti);
 }
 
-export function tumKategorileriGetir() {
-  return mockKategoriler;
-}

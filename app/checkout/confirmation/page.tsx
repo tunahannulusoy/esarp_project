@@ -5,7 +5,8 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, MessageCircle } from "lucide-react";
 import type { Siparis } from "@/app/types";
-import { siparisGetir, whatsappLinkiOlustur } from "@/app/lib/orders";
+import { whatsappLinkiOlustur } from "@/app/lib/orders";
+import { getOrderById } from "@/app/actions/orders";
 import { fiyatFormatla } from "@/app/lib/utils";
 
 function OnaySayfasiIcerik() {
@@ -18,7 +19,7 @@ function OnaySayfasiIcerik() {
       setSiparis(null);
       return;
     }
-    setSiparis(siparisGetir(id) ?? null);
+    getOrderById(id).then((veri) => setSiparis(veri));
   }, [id]);
 
   if (siparis === undefined) return null;

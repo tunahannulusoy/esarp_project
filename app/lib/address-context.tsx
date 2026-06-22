@@ -1,85 +1,93 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import type { Adres } from "@/app/types";
-
-const STORAGE_KEY = "esarp_adresler";
+import {
+  getAddresses,
+  addAddress as addAddressAction,
+  updateAddress as updateAddressAction,
+  deleteAddress as deleteAddressAction,
+  setDefaultAddress as setDefaultAddressAction,
+} from "@/app/actions/users";
 
 type YeniAdres = Omit<Adres, "id" | "kullanici_id" | "silinmis" | "olusturulma_tarihi">;
 
 type AddressContextValue = {
   adresler: Adres[];
-  adresEkle: (adres: YeniAdres) => Adres;
-  adresGuncelle: (id: string, adres: YeniAdres) => void;
-  adresSil: (id: string) => void;
-  varsayilanYap: (id: string) => void;
-  adresleriTemizle: () => void;
+  yukleniyor: boolean;
+  adresEkle: (adres: YeniAdres) => Promise<Adres | null>;
+  adresGuncelle: (id: string, adres: YeniAdres) => Promise<void>;
+  adresSil: (id: string) => Promise<void>;
+  varsayilanYap: (id: string) => Promise<void>;
 };
 
 const AddressContext = createContext<AddressContextValue | null>(null);
 
+function adresFormVerisi(adres: YeniAdres): FormData {
+  const fd = new FormData();
+  fd.set("il", adres.il);
+  fd.set("ilce", adres.ilce);
+  fd.set("mahalle", adres.mahalle);
+  fd.set("acik_adres", adres.acik_adres);
+  fd.set("adres_basligi", adres.adres_basligi);
+  fd.set("telefon", adres.telefon);
+  if (adres.varsayilan) fd.set("varsayilan", "on");
+  return fd;
+}
+
 export function AddressProvider({ children }: { children: React.ReactNode }) {
   const [adresler, setAdresler] = useState<Adres[]>([]);
-  const [yuklendi, setYuklendi] = useState(false);
+  const [yukleniyor, setYukleniyor] = useState(true);
+  const pathname = usePathname();
 
-  useEffect(() => {
-    try {
-      const ham = localStorage.getItem(STORAGE_KEY);
-      if (ham) setAdresler(JSON.parse(ham));
-    } catch {
-      // localStorage erişilemezse boş listeyle devam et
-    } finally {
-      setYuklendi(true);
-    }
+  const yenidenYukle = useCallback(async () => {
+    const veri = await getAddresses();
+    setAdresler(veri);
+    setYukleniyor(false);
   }, []);
 
   useEffect(() => {
-    if (!yuklendi) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(adresler));
-  }, [adresler, yuklendi]);
+    yenidenYukle();
+  }, [pathname, yenidenYukle]);
 
-  const adresEkle = useCallback((adres: YeniAdres) => {
-    const yeni: Adres = {
-      ...adres,
-      id: crypto.randomUUID(),
-      kullanici_id: "guest",
-      silinmis: false,
-      olusturulma_tarihi: new Date().toISOString(),
-    };
+  const adresEkle = useCallback(
+    async (adres: YeniAdres) => {
+      const sonuc = await addAddressAction(adresFormVerisi(adres));
+      if (!sonuc.success || !sonuc.adres) return null;
+      await yenidenYukle();
+      return sonuc.adres;
+    },
+    [yenidenYukle]
+  );
 
-    setAdresler((mevcut) => {
-      const guncellenmis = yeni.varsayilan
-        ? mevcut.map((a) => ({ ...a, varsayilan: false }))
-        : mevcut;
-      return [...guncellenmis, yeni];
-    });
+  const adresGuncelle = useCallback(
+    async (id: string, adres: YeniAdres) => {
+      await updateAddressAction(id, adresFormVerisi(adres));
+      await yenidenYukle();
+    },
+    [yenidenYukle]
+  );
 
-    return yeni;
-  }, []);
+  const adresSil = useCallback(
+    async (id: string) => {
+      await deleteAddressAction(id);
+      await yenidenYukle();
+    },
+    [yenidenYukle]
+  );
 
-  const adresGuncelle = useCallback((id: string, adres: YeniAdres) => {
-    setAdresler((mevcut) =>
-      mevcut.map((a) => {
-        if (a.id === id) return { ...a, ...adres };
-        if (adres.varsayilan) return { ...a, varsayilan: false };
-        return a;
-      })
-    );
-  }, []);
-
-  const adresSil = useCallback((id: string) => {
-    setAdresler((mevcut) => mevcut.filter((a) => a.id !== id));
-  }, []);
-
-  const varsayilanYap = useCallback((id: string) => {
-    setAdresler((mevcut) => mevcut.map((a) => ({ ...a, varsayilan: a.id === id })));
-  }, []);
-
-  const adresleriTemizle = useCallback(() => setAdresler([]), []);
+  const varsayilanYap = useCallback(
+    async (id: string) => {
+      await setDefaultAddressAction(id);
+      await yenidenYukle();
+    },
+    [yenidenYukle]
+  );
 
   const value = useMemo(
-    () => ({ adresler, adresEkle, adresGuncelle, adresSil, varsayilanYap, adresleriTemizle }),
-    [adresler, adresEkle, adresGuncelle, adresSil, varsayilanYap, adresleriTemizle]
+    () => ({ adresler, yukleniyor, adresEkle, adresGuncelle, adresSil, varsayilanYap }),
+    [adresler, yukleniyor, adresEkle, adresGuncelle, adresSil, varsayilanYap]
   );
 
   return <AddressContext.Provider value={value}>{children}</AddressContext.Provider>;

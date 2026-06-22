@@ -50,17 +50,3 @@ export function indirimliFiyatHesapla(fiyat: number, indirimOrani: number): numb
   if (!indirimOrani) return fiyat;
   return Math.round(fiyat * (1 - indirimOrani / 100) * 100) / 100;
 }
-
-export function urunGetir(id: string) {
-  return mockUrunler.find((u) => u.id === id);
-}
-
-export function ilgiliUrunleriGetir(urun: Urun, adet = 4) {
-  return mockUrunler
-    .filter((u) => u.id !== urun.id && u.kategori_id === urun.kategori_id)
-    .slice(0, adet);
-}
-
-export function kategoriGetir(id: string) {
-  return mockKategoriler.find((k) => k.id === id);
-}

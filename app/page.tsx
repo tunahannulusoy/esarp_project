@@ -2,11 +2,11 @@ import ProductCard from "@/app/components/product-card";
 import FilterPanel from "@/app/components/filter-panel";
 import SortSelect from "@/app/components/sort-select";
 import Pagination from "@/app/components/pagination";
-import { mockUrunler } from "@/app/lib/mock-data";
+import { getPublicProducts } from "@/app/actions/products-public";
+import { kategorileriGetir } from "@/app/lib/urun-data";
 import {
   aramaParametrelerindenFiltreleriCikar,
   tumBoyutlariGetir,
-  tumKategorileriGetir,
   tumRenkleriGetir,
   urunleriFiltreleVeSirala,
 } from "@/app/lib/filter-utils";
@@ -20,7 +20,9 @@ type HomePageProps = {
 export default async function HomePage({ searchParams }: HomePageProps) {
   const params = await searchParams;
   const filtreler = aramaParametrelerindenFiltreleriCikar(params);
-  const tumUrunler = urunleriFiltreleVeSirala(mockUrunler, filtreler);
+
+  const [tumUrunlerHam, kategoriler] = await Promise.all([getPublicProducts(), kategorileriGetir()]);
+  const tumUrunler = urunleriFiltreleVeSirala(tumUrunlerHam, filtreler);
 
   const toplamSayfa = Math.max(1, Math.ceil(tumUrunler.length / SAYFA_BOYUTU));
   const istenenSayfa = Number(Array.isArray(params.page) ? params.page[0] : params.page) || 1;
@@ -39,9 +41,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
         <aside>
           <FilterPanel
-            kategoriler={tumKategorileriGetir()}
-            renkler={tumRenkleriGetir(mockUrunler)}
-            boyutlar={tumBoyutlariGetir(mockUrunler)}
+            kategoriler={kategoriler}
+            renkler={tumRenkleriGetir(tumUrunlerHam)}
+            boyutlar={tumBoyutlariGetir(tumUrunlerHam)}
           />
         </aside>
 

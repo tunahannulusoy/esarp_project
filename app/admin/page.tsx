@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { adminUrunleriGetir } from "@/app/lib/admin-products";
-import { kullaniciSiparisleriGetir } from "@/app/lib/orders";
+import { getAdminProducts } from "@/app/actions/products";
+import { getAllOrdersAdmin } from "@/app/actions/orders";
+import type { Siparis } from "@/app/types";
 import { fiyatFormatla } from "@/app/lib/utils";
 
 export default function AdminDashboardPage() {
@@ -12,12 +13,13 @@ export default function AdminDashboardPage() {
   const [bekleyenSiparis, setBekleyenSiparis] = useState(0);
 
   useEffect(() => {
-    const urunler = adminUrunleriGetir();
-    const siparisler = kullaniciSiparisleriGetir();
-    setUrunSayisi(urunler.length);
-    setSiparisSayisi(siparisler.length);
-    setToplamGelir(siparisler.reduce((acc, s) => acc + s.toplam_tutar, 0));
-    setBekleyenSiparis(siparisler.filter((s) => s.durum === "Ödeme Bekleme").length);
+    getAdminProducts().then((urunler) => setUrunSayisi(urunler.length));
+
+    getAllOrdersAdmin().then((siparisler: Siparis[]) => {
+      setSiparisSayisi(siparisler.length);
+      setToplamGelir(siparisler.reduce((acc, s) => acc + s.toplam_tutar, 0));
+      setBekleyenSiparis(siparisler.filter((s) => s.durum === "Ödeme Bekleme").length);
+    });
   }, []);
 
   const kartlar = [

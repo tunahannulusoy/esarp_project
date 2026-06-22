@@ -2,35 +2,45 @@
 
 import { useEffect, useState } from "react";
 import type { Kategori } from "@/app/types";
-import { adminKategorileriGetir, adminKategoriOlustur, adminKategoriSil } from "@/app/lib/admin-categories";
+import { createCategory, deleteCategory, getAdminCategories } from "@/app/actions/categories";
 
 export default function AdminCategoriesPage() {
   const [kategoriler, setKategoriler] = useState<Kategori[]>([]);
   const [ad, setAd] = useState("");
   const [aciklama, setAciklama] = useState("");
+  const [hata, setHata] = useState<string | null>(null);
 
   useEffect(() => {
-    setKategoriler(adminKategorileriGetir());
+    getAdminCategories().then(setKategoriler);
   }, []);
 
-  const handleEkle = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleEkle = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setHata(null);
     if (!ad.trim()) return;
-    adminKategoriOlustur({ ad, aciklama });
-    setKategoriler(adminKategorileriGetir());
+
+    const sonuc = await createCategory(ad, aciklama);
+    if (!sonuc.success) {
+      setHata(sonuc.message ?? "Kategori eklenemedi");
+      return;
+    }
+
+    getAdminCategories().then(setKategoriler);
     setAd("");
     setAciklama("");
   };
 
-  const handleSil = (id: string) => {
+  const handleSil = async (id: string) => {
     if (!confirm("Bu kategoriyi silmek istediğinize emin misiniz?")) return;
-    adminKategoriSil(id);
-    setKategoriler(adminKategorileriGetir());
+    await deleteCategory(id);
+    getAdminCategories().then(setKategoriler);
   };
 
   return (
     <div>
       <h1 className="text-2xl font-semibold text-stone-900">Kategoriler</h1>
+
+      {hata && <p className="mt-4 max-w-xl rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{hata}</p>}
 
       <form onSubmit={handleEkle} className="mt-6 flex max-w-xl gap-3 rounded-xl bg-white p-4 shadow-sm">
         <input

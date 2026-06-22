@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useSession } from "@/app/lib/use-session";
+import SignInModal from "@/app/components/sign-in-modal";
 
 const SEKMELER = [
   { href: "/profile", etiket: "Profilim" },
@@ -13,6 +15,17 @@ const SEKMELER = [
 
 export default function ProfileLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { girisYapilmis, yukleniyor } = useSession();
+
+  if (!yukleniyor && !girisYapilmis) {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6 lg:px-8">
+        <p className="text-lg text-stone-600">Profilinizi görüntülemek için giriş yapmalısınız.</p>
+        <SignInModal acik onKapat={() => router.push("/")} hedefYol={pathname} />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">

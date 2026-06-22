@@ -1,6 +1,8 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useSession } from "@/app/lib/use-session";
+import { addServerFavorite, removeServerFavorite } from "@/app/actions/favorites";
 
 const STORAGE_KEY = "esarp_favoriler";
 
@@ -10,6 +12,7 @@ type FavoritesContextValue = {
   favoriEkleCikar: (urunId: string) => void;
   favorilerdenCikar: (urunId: string) => void;
   favorileriTemizle: () => void;
+  favoriDisaridanBirlestir: (sunucuUrunIdleri: string[]) => void;
 };
 
 const FavoritesContext = createContext<FavoritesContextValue | null>(null);
@@ -17,6 +20,7 @@ const FavoritesContext = createContext<FavoritesContextValue | null>(null);
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const [favoriUrunIdleri, setFavoriUrunIdleri] = useState<string[]>([]);
   const [yuklendi, setYuklendi] = useState(false);
+  const { girisYapilmis } = useSession();
 
   useEffect(() => {
     try {
@@ -36,21 +40,44 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 
   const favoriMi = useCallback((urunId: string) => favoriUrunIdleri.includes(urunId), [favoriUrunIdleri]);
 
-  const favoriEkleCikar = useCallback((urunId: string) => {
-    setFavoriUrunIdleri((mevcut) =>
-      mevcut.includes(urunId) ? mevcut.filter((id) => id !== urunId) : [...mevcut, urunId]
-    );
-  }, []);
+  const favoriEkleCikar = useCallback(
+    (urunId: string) => {
+      setFavoriUrunIdleri((mevcut) => {
+        const eklenecek = !mevcut.includes(urunId);
+        if (girisYapilmis) {
+          if (eklenecek) addServerFavorite(urunId);
+          else removeServerFavorite(urunId);
+        }
+        return eklenecek ? [...mevcut, urunId] : mevcut.filter((id) => id !== urunId);
+      });
+    },
+    [girisYapilmis]
+  );
 
-  const favorilerdenCikar = useCallback((urunId: string) => {
-    setFavoriUrunIdleri((mevcut) => mevcut.filter((id) => id !== urunId));
-  }, []);
+  const favorilerdenCikar = useCallback(
+    (urunId: string) => {
+      if (girisYapilmis) removeServerFavorite(urunId);
+      setFavoriUrunIdleri((mevcut) => mevcut.filter((id) => id !== urunId));
+    },
+    [girisYapilmis]
+  );
 
   const favorileriTemizle = useCallback(() => setFavoriUrunIdleri([]), []);
 
+  const favoriDisaridanBirlestir = useCallback((sunucuUrunIdleri: string[]) => {
+    setFavoriUrunIdleri((mevcut) => Array.from(new Set([...mevcut, ...sunucuUrunIdleri])));
+  }, []);
+
   const value = useMemo(
-    () => ({ favoriUrunIdleri, favoriMi, favoriEkleCikar, favorilerdenCikar, favorileriTemizle }),
-    [favoriUrunIdleri, favoriMi, favoriEkleCikar, favorilerdenCikar, favorileriTemizle]
+    () => ({
+      favoriUrunIdleri,
+      favoriMi,
+      favoriEkleCikar,
+      favorilerdenCikar,
+      favorileriTemizle,
+      favoriDisaridanBirlestir,
+    }),
+    [favoriUrunIdleri, favoriMi, favoriEkleCikar, favorilerdenCikar, favorileriTemizle, favoriDisaridanBirlestir]
   );
 
   return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;

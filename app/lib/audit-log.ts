@@ -11,7 +11,12 @@ export type AuditOlayTipi =
   | "email_guncellendi"
   | "hesap_silindi"
   | "siparis_olusturuldu"
-  | "siparis_durumu_degisti";
+  | "siparis_durumu_degisti"
+  | "urun_olusturuldu"
+  | "urun_guncellendi"
+  | "urun_silindi"
+  | "kategori_olusturuldu"
+  | "kategori_silindi";
 
 export async function auditLogEkle(
   olayTipi: AuditOlayTipi,

@@ -4,20 +4,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Urun } from "@/app/types";
-import { adminUrunleriGetir, adminUrunSil } from "@/app/lib/admin-products";
+import { deleteProduct, getAdminProducts } from "@/app/actions/products";
 import { fiyatFormatla } from "@/app/lib/utils";
 
 export default function AdminProductsPage() {
   const [urunler, setUrunler] = useState<Urun[]>([]);
 
   useEffect(() => {
-    setUrunler(adminUrunleriGetir());
+    getAdminProducts().then(setUrunler);
   }, []);
 
-  const handleSil = (id: string) => {
+  const handleSil = async (id: string) => {
     if (!confirm("Bu ürünü silmek istediğinize emin misiniz?")) return;
-    adminUrunSil(id);
-    setUrunler(adminUrunleriGetir());
+    await deleteProduct(id);
+    getAdminProducts().then(setUrunler);
   };
 
   return (

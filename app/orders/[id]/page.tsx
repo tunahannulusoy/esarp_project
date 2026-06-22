@@ -5,29 +5,20 @@ import { useEffect, useState } from "react";
 import { use } from "react";
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import type { Adres, Siparis } from "@/app/types";
-import { siparisGetir, whatsappLinkiOlustur } from "@/app/lib/orders";
-import { urunGetir } from "@/app/lib/mock-data";
+import { whatsappLinkiOlustur } from "@/app/lib/orders";
+import { getOrderById } from "@/app/actions/orders";
+import { useUrunler } from "@/app/lib/use-urunler";
+import { useAddresses } from "@/app/lib/address-context";
 import { fiyatFormatla } from "@/app/lib/utils";
-
-function adresGetir(adresId: string): Adres | undefined {
-  try {
-    const ham = localStorage.getItem("esarp_adresler");
-    const adresler: Adres[] = ham ? JSON.parse(ham) : [];
-    return adresler.find((a) => a.id === adresId);
-  } catch {
-    return undefined;
-  }
-}
 
 export default function OrderTrackingPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [siparis, setSiparis] = useState<Siparis | null | undefined>(undefined);
-  const [adres, setAdres] = useState<Adres | undefined>(undefined);
+  const { urunGetir } = useUrunler();
+  const { adresler } = useAddresses();
 
   useEffect(() => {
-    const bulunan = siparisGetir(id);
-    setSiparis(bulunan ?? null);
-    if (bulunan) setAdres(adresGetir(bulunan.adres_id));
+    getOrderById(id).then((veri) => setSiparis(veri));
   }, [id]);
 
   if (siparis === undefined) return null;
@@ -42,6 +33,8 @@ export default function OrderTrackingPage({ params }: { params: Promise<{ id: st
       </div>
     );
   }
+
+  const adres: Adres | undefined = adresler.find((a) => a.id === siparis.adres_id);
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8">

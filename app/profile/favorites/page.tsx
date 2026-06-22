@@ -6,17 +6,19 @@ import { useMemo, useState } from "react";
 import { Heart, LayoutGrid, List } from "lucide-react";
 import { useFavorites } from "@/app/lib/favorites-context";
 import { useCart } from "@/app/lib/cart-context";
-import { indirimliFiyatHesapla, urunGetir } from "@/app/lib/mock-data";
+import { indirimliFiyatHesapla } from "@/app/lib/mock-data";
+import { useUrunler } from "@/app/lib/use-urunler";
 import { fiyatFormatla } from "@/app/lib/utils";
 
 export default function FavoritesPage() {
   const { favoriUrunIdleri, favorilerdenCikar } = useFavorites();
   const { sepeteEkle } = useCart();
+  const { urunGetir } = useUrunler();
   const [gorunum, setGorunum] = useState<"grid" | "list">("grid");
 
   const favoriUrunler = useMemo(
     () => favoriUrunIdleri.map((id) => urunGetir(id)).filter((u): u is NonNullable<typeof u> => Boolean(u)),
-    [favoriUrunIdleri]
+    [favoriUrunIdleri, urunGetir]
   );
 
   const hepsiniSepeteEkle = () => {

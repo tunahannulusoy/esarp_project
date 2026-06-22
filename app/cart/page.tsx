@@ -6,7 +6,8 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/app/lib/cart-context";
 import { fiyatFormatla } from "@/app/lib/utils";
-import { indirimliFiyatHesapla, urunGetir } from "@/app/lib/mock-data";
+import { indirimliFiyatHesapla } from "@/app/lib/mock-data";
+import { useUrunler } from "@/app/lib/use-urunler";
 import { useSession } from "@/app/lib/use-session";
 import SignInModal from "@/app/components/sign-in-modal";
 
@@ -16,6 +17,7 @@ const UCRETSIZ_KARGO_ESIGI = 500;
 export default function CartPage() {
   const { items, sepettenCikar, adetGuncelle } = useCart();
   const { girisYapilmis } = useSession();
+  const { urunGetir } = useUrunler();
   const router = useRouter();
   const [modalAcik, setModalAcik] = useState(false);
 
@@ -36,7 +38,7 @@ export default function CartPage() {
           return { ...item, urun };
         })
         .filter((o): o is NonNullable<typeof o> => o !== null),
-    [items]
+    [items, urunGetir]
   );
 
   const urunlerToplami = sepetOgeleri.reduce((acc, oge) => {

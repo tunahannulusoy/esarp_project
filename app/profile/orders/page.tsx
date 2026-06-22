@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Siparis } from "@/app/types";
-import { kullaniciSiparisleriGetir } from "@/app/lib/orders";
+import { getUserOrders } from "@/app/actions/orders";
 import { fiyatFormatla } from "@/app/lib/utils";
 import { useCart } from "@/app/lib/cart-context";
-import { urunGetir } from "@/app/lib/mock-data";
+import { useUrunler } from "@/app/lib/use-urunler";
 
 const DURUM_RENGI: Record<Siparis["durum"], string> = {
   "Ödeme Bekleme": "bg-amber-100 text-amber-700",
@@ -18,10 +18,15 @@ const DURUM_RENGI: Record<Siparis["durum"], string> = {
 
 export default function OrdersPage() {
   const [siparisler, setSiparisler] = useState<Siparis[]>([]);
+  const [yukleniyor, setYukleniyor] = useState(true);
   const { sepeteEkle } = useCart();
+  const { urunGetir } = useUrunler();
 
   useEffect(() => {
-    setSiparisler(kullaniciSiparisleriGetir());
+    getUserOrders().then((veri) => {
+      setSiparisler(veri);
+      setYukleniyor(false);
+    });
   }, []);
 
   const tekrarSiparisVer = (siparis: Siparis) => {
@@ -35,6 +40,8 @@ export default function OrdersPage() {
       });
     });
   };
+
+  if (yukleniyor) return null;
 
   if (siparisler.length === 0) {
     return <p className="text-sm text-stone-600">Henüz siparişiniz bulunmuyor.</p>;
