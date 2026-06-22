@@ -11,7 +11,7 @@ import {
   urunleriFiltreleVeSirala,
 } from "@/app/lib/filter-utils";
 
-const SAYFA_BOYUTU = 16;
+const SAYFA_BOYUTU = 15;
 
 type HomePageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
