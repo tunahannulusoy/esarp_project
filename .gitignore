@@ -46,6 +46,7 @@ yarn-error.log*
 
 # claude code (local-only settings)
 .claude/settings.local.json
+.claude/scheduled_tasks.lock
 
 # typescript
 *.tsbuildinfo
