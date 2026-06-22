@@ -50,7 +50,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             <p className="text-sm text-stone-600">Bu kriterlere uygun ürün bulunamadı.</p>
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                 {urunler.map((urun) => (
                   <ProductCard key={urun.id} urun={urun} />
                 ))}
