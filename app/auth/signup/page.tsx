@@ -14,7 +14,6 @@ export default function SignUpPage() {
   const [adim, setAdim] = useState<Adim>("email");
   const [email, setEmail] = useState("");
   const [kod, setKod] = useState("");
-  const [devKod, setDevKod] = useState<string | null>(null);
   const [hata, setHata] = useState<string | null>(null);
   const [basari, setBasari] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -29,7 +28,6 @@ export default function SignUpPage() {
     startTransition(async () => {
       const sonuc = await dogrulamaKoduGonder(email);
       if (sonuc.success) {
-        setDevKod(sonuc.devKod ?? null);
         setAdim("kod");
       } else {
         setHata(sonuc.message);
@@ -126,11 +124,6 @@ export default function SignUpPage() {
       {adim === "kod" && (
         <form onSubmit={koduDogrula} className="mt-6 space-y-4">
           <p className="text-sm text-stone-600">{email} adresine 6 haneli kod gönderildi.</p>
-          {devKod && (
-            <p className="rounded-lg bg-amber-50 px-4 py-2 text-xs text-amber-700">
-              Geliştirme modu — gönderilen kod: <strong>{devKod}</strong>
-            </p>
-          )}
           <div>
             <label htmlFor="kod" className="block text-sm font-medium text-stone-700">
               Doğrulama Kodu
