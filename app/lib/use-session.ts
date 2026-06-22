@@ -43,3 +43,15 @@ export function useSession() {
 
   return { user, girisYapilmis: Boolean(user), yukleniyor };
 }
+
+/**
+ * Tarayıcı client'ı üzerinden çıkış yapar. Bu, onAuthStateChange'i anında
+ * tetikleyerek arayüzü hemen günceller (logout server action'ı sunucu
+ * cookie'lerini temizleyip yönlendirme yapar, ama aynı sayfaya geri
+ * dönüldüğünde pathname değişmediği için arayüz güncellemesi gecikebilir).
+ */
+export async function istemciTarafindaCikisYap() {
+  if (!supabaseYapilandirilmisMi) return;
+  const supabase = createClient();
+  await supabase.auth.signOut();
+}

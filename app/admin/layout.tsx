@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { FolderOpen, LayoutDashboard, LogOut, Package, ShoppingCart } from "lucide-react";
 import { logout } from "@/app/actions/auth";
+import { istemciTarafindaCikisYap } from "@/app/lib/use-session";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -16,6 +17,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const handleLogout = async () => {
     setCikisYapiliyor(true);
+    await istemciTarafindaCikisYap();
     await logout();
   };
 

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ChevronDown, Heart, LogOut, MapPin, Menu, Package, Search, ShoppingCart, User } from "lucide-react";
 import { useCart } from "@/app/lib/cart-context";
 import { useFavorites } from "@/app/lib/favorites-context";
-import { useSession } from "@/app/lib/use-session";
+import { useSession, istemciTarafindaCikisYap } from "@/app/lib/use-session";
 import { logout } from "@/app/actions/auth";
 
 export default function Header() {
@@ -16,6 +16,11 @@ export default function Header() {
   const { girisYapilmis } = useSession();
   const sepetSayisi = toplamAdet;
   const favoriSayisi = favoriUrunIdleri.length;
+
+  const handleCikisYap = async () => {
+    await istemciTarafindaCikisYap();
+    await logout();
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-stone-300 bg-white shadow-sm">
@@ -91,7 +96,7 @@ export default function Header() {
                     </Link>
                     <button
                       type="button"
-                      onClick={() => logout()}
+                      onClick={handleCikisYap}
                       className="flex w-full items-center gap-2 border-t border-stone-100 px-4 py-2 text-sm text-rose-600 hover:bg-stone-50"
                     >
                       <LogOut className="h-4 w-4" strokeWidth={1.5} />
@@ -155,7 +160,7 @@ export default function Header() {
                 <MapPin className="h-5 w-5" strokeWidth={1.5} />
                 Adreslerim
               </Link>
-              <button type="button" onClick={() => logout()} className="flex items-center gap-2 text-rose-600">
+              <button type="button" onClick={handleCikisYap} className="flex items-center gap-2 text-rose-600">
                 <LogOut className="h-5 w-5" strokeWidth={1.5} />
                 Çıkış Yap
               </button>

@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { LogOut } from "lucide-react";
 import { deleteAccount, logout, updateEmail, updatePassword, type AuthFormState } from "@/app/actions/auth";
+import { istemciTarafindaCikisYap } from "@/app/lib/use-session";
 
 const baslangicState: AuthFormState = { success: false };
 const BILDIRIM_STORAGE_KEY = "esarp_bildirim_tercihleri";
@@ -10,6 +11,11 @@ const BILDIRIM_STORAGE_KEY = "esarp_bildirim_tercihleri";
 export default function SettingsPage() {
   const [emailState, emailAction, emailPending] = useActionState(updateEmail, baslangicState);
   const [passwordState, passwordAction, passwordPending] = useActionState(updatePassword, baslangicState);
+
+  const handleCikisYap = async () => {
+    await istemciTarafindaCikisYap();
+    await logout();
+  };
 
   const [bildirimAcik, setBildirimAcik] = useState(true);
   const [silOnay, setSilOnay] = useState(false);
@@ -152,7 +158,7 @@ export default function SettingsPage() {
       <section className="border-t border-stone-200 pt-6">
         <button
           type="button"
-          onClick={() => logout()}
+          onClick={handleCikisYap}
           className="flex items-center gap-2 rounded-lg border border-stone-300 px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
         >
           <LogOut className="h-4 w-4" strokeWidth={1.5} />
