@@ -152,7 +152,7 @@ export async function resetPassword(_prevState: AuthFormState, formData: FormDat
 
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset/confirm`,
+    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/confirm?next=/auth/reset/confirm`,
   });
 
   if (error) {
@@ -174,7 +174,10 @@ export async function updateEmail(_prevState: AuthFormState, formData: FormData)
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.updateUser({ email });
+  const { error } = await supabase.auth.updateUser(
+    { email },
+    { emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/confirm?next=/profile/settings` }
+  );
 
   if (error) {
     return { success: false, message: error.message };
@@ -182,7 +185,10 @@ export async function updateEmail(_prevState: AuthFormState, formData: FormData)
 
   await auditLogEkle("email_guncellendi", { yeniEmail: email });
 
-  return { success: true, message: "Yeni email adresinize onay linki gönderildi." };
+  return {
+    success: true,
+    message: "Onay linki hem eski hem yeni email adresinize gönderildi. Değişikliğin tamamlanması için her iki linke de tıklamanız gerekebilir.",
+  };
 }
 
 export async function updatePassword(_prevState: AuthFormState, formData: FormData): Promise<AuthFormState> {
