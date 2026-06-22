@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { useCart } from "@/app/lib/cart-context";
 import { useFavorites } from "@/app/lib/favorites-context";
+import { SEPET_BIRLESTIRME_ANAHTARI } from "@/app/components/cart-session-sync";
 
 /**
  * Çıkış yapıldığında, bu tarayıcıda biriken (guest) sepet/favori verilerini
@@ -18,5 +19,6 @@ export function useClearLocalSession() {
   return useCallback(() => {
     sepetiTemizle();
     favorileriTemizle();
+    sessionStorage.removeItem(SEPET_BIRLESTIRME_ANAHTARI);
   }, [sepetiTemizle, favorileriTemizle]);
 }

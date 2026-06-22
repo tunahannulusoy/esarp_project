@@ -5,10 +5,11 @@ import { useSession } from "@/app/lib/use-session";
 import { useCart } from "@/app/lib/cart-context";
 import { mergeServerCart, saveServerCart } from "@/app/actions/cart";
 
+export const SEPET_BIRLESTIRME_ANAHTARI = "esarp_sepet_birlestirildi";
+
 export default function CartSessionSync() {
   const { user } = useSession();
   const { items, sepetiAyarla } = useCart();
-  const birlestirilenKullaniciId = useRef<string | null>(null);
   const itemsRef = useRef(items);
   itemsRef.current = items;
 
@@ -19,13 +20,25 @@ export default function CartSessionSync() {
   const [birlestirmeHazir, setBirlestirmeHazir] = useState(false);
 
   useEffect(() => {
-    if (!user || birlestirilenKullaniciId.current === user.id) return;
-    birlestirilenKullaniciId.current = user.id;
+    if (!user) return;
+
+    // Bu bayrak sessionStorage'da tutuluyor (useRef değil) çünkü bir
+    // useRef, sayfa her yenilendiğinde sıfırlanır — bu da zaten birleşmiş
+    // sepeti her refresh'te yeniden "birleştirip" adetleri tekrar tekrar
+    // toplamaya (her yenilemede ürün sayısının artmasına) yol açıyordu.
+    // sessionStorage aynı sekme/oturum boyunca kalıcı, gerçek çıkışta
+    // (useClearLocalSession) temizleniyor.
+    if (sessionStorage.getItem(SEPET_BIRLESTIRME_ANAHTARI) === user.id) {
+      setBirlestirmeHazir(true);
+      return;
+    }
+
     setBirlestirmeHazir(false);
 
     (async () => {
       const birlesik = await mergeServerCart(itemsRef.current);
       sepetiAyarla(birlesik);
+      sessionStorage.setItem(SEPET_BIRLESTIRME_ANAHTARI, user.id);
       setBirlestirmeHazir(true);
     })();
   }, [user, sepetiAyarla]);
