@@ -1,36 +1,39 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "@/app/lib/use-session";
 import { useCart } from "@/app/lib/cart-context";
-import { sepetleriBirlestir } from "@/app/lib/cart-context";
-import { getServerCart, saveServerCart } from "@/app/actions/cart";
+import { mergeServerCart, saveServerCart } from "@/app/actions/cart";
 
 export default function CartSessionSync() {
   const { user } = useSession();
-  const { items, sepetiDisaridanBirlestir } = useCart();
+  const { items, sepetiAyarla } = useCart();
   const birlestirilenKullaniciId = useRef<string | null>(null);
   const itemsRef = useRef(items);
   itemsRef.current = items;
 
+  // Giriş yapılınca yerel sepet sunucuyla tek atomik istekte birleştirilene
+  // kadar otomatik kaydetme effect'i devre dışı kalır. Aksi halde, sunucu
+  // henüz cevap vermeden tetiklenen bir kaydetme, eski/yarım sepeti
+  // sunucuya geri yazıp asıl veriyi ezebilir.
+  const [birlestirmeHazir, setBirlestirmeHazir] = useState(false);
+
   useEffect(() => {
     if (!user || birlestirilenKullaniciId.current === user.id) return;
     birlestirilenKullaniciId.current = user.id;
+    setBirlestirmeHazir(false);
 
     (async () => {
-      const sunucuSepeti = await getServerCart();
-      if (sunucuSepeti.length === 0) return;
-
-      const birlesik = sepetleriBirlestir(itemsRef.current, sunucuSepeti);
-      sepetiDisaridanBirlestir(sunucuSepeti);
-      await saveServerCart(birlesik);
+      const birlesik = await mergeServerCart(itemsRef.current);
+      sepetiAyarla(birlesik);
+      setBirlestirmeHazir(true);
     })();
-  }, [user, sepetiDisaridanBirlestir]);
+  }, [user, sepetiAyarla]);
 
   useEffect(() => {
-    if (!user || birlestirilenKullaniciId.current !== user.id) return;
+    if (!user || !birlestirmeHazir) return;
     saveServerCart(items);
-  }, [items, user]);
+  }, [items, user, birlestirmeHazir]);
 
   return null;
 }

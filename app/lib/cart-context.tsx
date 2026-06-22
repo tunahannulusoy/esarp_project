@@ -14,6 +14,7 @@ type CartContextValue = {
   sepetiTemizle: () => void;
   sepetteMi: (urunId: string) => boolean;
   sepetiDisaridanBirlestir: (sunucuOgeleri: SepetUrun[]) => void;
+  sepetiAyarla: (items: SepetUrun[]) => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -96,6 +97,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const sepetiAyarla = useCallback((yeniItems: SepetUrun[]) => setItems(yeniItems), []);
+
   const toplamAdet = useMemo(() => items.reduce((acc, o) => acc + o.adet, 0), [items]);
 
   const value = useMemo(
@@ -108,8 +111,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       sepetiTemizle,
       sepetteMi,
       sepetiDisaridanBirlestir,
+      sepetiAyarla,
     }),
-    [items, toplamAdet, sepeteEkle, sepettenCikar, adetGuncelle, sepetiTemizle, sepetteMi, sepetiDisaridanBirlestir]
+    [
+      items,
+      toplamAdet,
+      sepeteEkle,
+      sepettenCikar,
+      adetGuncelle,
+      sepetiTemizle,
+      sepetteMi,
+      sepetiDisaridanBirlestir,
+      sepetiAyarla,
+    ]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
