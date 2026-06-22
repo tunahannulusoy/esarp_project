@@ -41,7 +41,7 @@ export async function signUp(_prevState: AuthFormState, formData: FormData): Pro
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
   });
@@ -50,10 +50,20 @@ export async function signUp(_prevState: AuthFormState, formData: FormData): Pro
     return { success: false, message: error.message };
   }
 
+  // Email sahipliği kayıt formundan önce, app'in kendi 6 haneli kod akışıyla
+  // zaten doğrulandı (bkz. app/actions/email-verification.ts). Supabase'in
+  // kendi "confirm signup" akışı bundan habersiz olduğu için ayrıca bir
+  // onay maili daha gönderip girişi engelliyordu — admin API ile hesabı
+  // burada doğrudan doğrulanmış işaretleyerek bu tekrarı ortadan kaldırıyoruz.
+  if (data.user) {
+    const adminSupabase = createAdminClient();
+    await adminSupabase.auth.admin.updateUserById(data.user.id, { email_confirm: true });
+  }
+
   await hosGeldinEmailiGonder(parsed.data.email, parsed.data.email.split("@")[0]);
   await auditLogEkle("kayit_olusturuldu", { email: parsed.data.email });
 
-  return { success: true, message: "Kayıt başarılı! Email adresinizi doğrulayın." };
+  return { success: true, message: "Kayıt başarılı! Şimdi giriş yapabilirsiniz." };
 }
 
 export async function signIn(_prevState: AuthFormState, formData: FormData): Promise<AuthFormState> {
