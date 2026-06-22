@@ -83,7 +83,8 @@ export type Siparis = {
   kullanici_id: string;
   musteri_email: string | null;
   musteri_adi: string;
-  adres_id: string;
+  adres_id: string | null;
+  teslimat_adresi: string | null;
   urunler: SiparisUrun[];
   urunler_toplami: number;
   kargo_ucreti: number;

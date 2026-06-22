@@ -38,10 +38,16 @@ export async function createOrder(
 
   const supabase = await createClient();
 
-  const { data: adres } = await supabase.from("adresler").select("il").eq("id", adresId).single();
+  const { data: adres } = await supabase
+    .from("adresler")
+    .select("il, ilce, mahalle, acik_adres")
+    .eq("id", adresId)
+    .single();
   if (!adres) {
     return { success: false, message: "Adres bulunamadı" };
   }
+
+  const teslimatAdresi = [adres.acik_adres, adres.mahalle, adres.ilce, adres.il].filter(Boolean).join(", ");
 
   const urunlerToplami = sepetOgeleri.reduce((acc, o) => acc + o.fiyat * o.adet, 0);
   const kargoUcreti = kargoUcretiHesapla(adres.il);
@@ -56,6 +62,7 @@ export async function createOrder(
       musteri_email: user.email,
       musteri_adi: musteriAdi,
       adres_id: adresId,
+      teslimat_adresi: teslimatAdresi,
       urunler: sepetOgeleri,
       urunler_toplami: urunlerToplami,
       kargo_ucreti: kargoUcreti,

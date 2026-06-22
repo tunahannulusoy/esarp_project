@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/app/lib/supabase/server";
+import { createAdminClient } from "@/app/lib/supabase/admin";
 import { signInSchema, signUpSchema } from "@/app/lib/validation";
 import { supabaseYapilandirilmisMi } from "@/app/lib/auth";
 import { hosGeldinEmailiGonder } from "@/app/lib/email";
@@ -227,13 +228,27 @@ export async function deleteAccount(): Promise<AuthFormState> {
     return { success: false, message: "Oturum bulunamadı" };
   }
 
-  const { error } = await supabase.from("users").update({ aktif: false }).eq("id", user.id);
+  // Kullanıcının kendi kimliği doğrulandıktan sonra, sadece bu işlem için
+  // yükseltilmiş yetkili (service-role) client kullanılır.
+  const adminSupabase = createAdminClient();
+
+  // Sipariş kayıtları mali/ticari nedenlerle saklanır, ama kişisel veri
+  // referansları (ad, email) silinmeden önce anonimleştirilir.
+  await adminSupabase
+    .from("siparisler")
+    .update({ musteri_adi: "Silinmiş Kullanıcı", musteri_email: null })
+    .eq("kullanici_id", user.id);
+
+  // auth.users kaydını siler; public.users -> auth.users FK'si cascade
+  // olduğu için profil, adresler, favoriler ve sepet de otomatik silinir.
+  // siparisler.kullanici_id ise (FK: on delete set null) null'a düşer.
+  const { error } = await adminSupabase.auth.admin.deleteUser(user.id);
 
   if (error) {
     return { success: false, message: error.message };
   }
 
-  await auditLogEkle("hesap_silindi", { email: user.email }, user.id);
+  await auditLogEkle("hesap_silindi", { email: user.email });
   await supabase.auth.signOut();
   redirect("/");
 }
