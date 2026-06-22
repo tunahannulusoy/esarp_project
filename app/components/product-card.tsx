@@ -65,11 +65,6 @@ export default function ProductCard({ urun }: { urun: Urun }) {
               %{urun.indirim_orani} indirim
             </span>
           )}
-          {urun.stok === 0 && (
-            <span className="absolute inset-x-0 bottom-0 bg-stone-900/80 py-1 text-center text-xs text-white">
-              Stokta Yok
-            </span>
-          )}
         </div>
 
         <h3 className="mt-3 line-clamp-1 text-sm font-medium text-stone-900">{urun.ad}</h3>
