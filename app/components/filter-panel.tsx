@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { ChevronDown, ChevronUp, Package, Palette, Ruler, SlidersHorizontal, Star } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Check, ChevronDown, ChevronUp, Package, Palette, Ruler, SlidersHorizontal, Star } from "lucide-react";
 import type { Kategori } from "@/app/types";
 
 type FilterPanelProps = {
@@ -23,6 +23,15 @@ export default function FilterPanel({ kategoriler, renkler, boyutlar }: FilterPa
   const maxFiyat = searchParams.get("maxFiyat") ?? "";
   const minPuan = searchParams.get("puan") ?? "";
 
+  const [minFiyatTaslak, setMinFiyatTaslak] = useState(minFiyat);
+  const [maxFiyatTaslak, setMaxFiyatTaslak] = useState(maxFiyat);
+  const fiyatDegisti = minFiyatTaslak !== minFiyat || maxFiyatTaslak !== maxFiyat;
+
+  useEffect(() => {
+    setMinFiyatTaslak(minFiyat);
+    setMaxFiyatTaslak(maxFiyat);
+  }, [minFiyat, maxFiyat]);
+
   const parametreyiGuncelle = (anahtar: string, deger: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
     if (deger === null || deger === "") {
@@ -41,7 +50,19 @@ export default function FilterPanel({ kategoriler, renkler, boyutlar }: FilterPa
     parametreyiGuncelle(anahtar, yeniListe.length > 0 ? yeniListe.join(",") : null);
   };
 
+  const fiyatUygula = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (minFiyatTaslak) params.set("minFiyat", minFiyatTaslak);
+    else params.delete("minFiyat");
+    if (maxFiyatTaslak) params.set("maxFiyat", maxFiyatTaslak);
+    else params.delete("maxFiyat");
+    params.delete("page");
+    router.push(`/?${params.toString()}`, { scroll: false });
+  };
+
   const filtreleriTemizle = () => {
+    setMinFiyatTaslak("");
+    setMaxFiyatTaslak("");
     router.push("/", { scroll: false });
   };
 
@@ -81,19 +102,30 @@ export default function FilterPanel({ kategoriler, renkler, boyutlar }: FilterPa
             <input
               type="number"
               placeholder="Min"
-              defaultValue={minFiyat}
-              onBlur={(e) => parametreyiGuncelle("minFiyat", e.target.value)}
-              className="w-full rounded-lg border border-stone-300 px-2 py-1.5 text-sm"
+              value={minFiyatTaslak}
+              onChange={(e) => setMinFiyatTaslak(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && fiyatUygula()}
+              className="w-full rounded-lg border border-stone-300 px-2 py-1.5 text-sm focus:border-stone-500 focus:outline-none"
             />
             <span className="text-stone-400">–</span>
             <input
               type="number"
               placeholder="Max"
-              defaultValue={maxFiyat}
-              onBlur={(e) => parametreyiGuncelle("maxFiyat", e.target.value)}
-              className="w-full rounded-lg border border-stone-300 px-2 py-1.5 text-sm"
+              value={maxFiyatTaslak}
+              onChange={(e) => setMaxFiyatTaslak(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && fiyatUygula()}
+              className="w-full rounded-lg border border-stone-300 px-2 py-1.5 text-sm focus:border-stone-500 focus:outline-none"
             />
           </div>
+          <button
+            type="button"
+            onClick={fiyatUygula}
+            disabled={!fiyatDegisti}
+            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg bg-stone-900 py-1.5 text-xs font-medium text-white transition hover:bg-stone-700 disabled:cursor-not-allowed disabled:bg-stone-200 disabled:text-stone-400"
+          >
+            <Check className="h-3.5 w-3.5" strokeWidth={1.5} />
+            Uygula
+          </button>
         </div>
 
         <div>
