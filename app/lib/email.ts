@@ -16,7 +16,14 @@ async function emailGonder(to: string, subject: string, html: string) {
   }
 
   try {
-    await resendClient().emails.send({ from: GONDEREN_EMAIL, to, subject, html });
+    // Resend SDK'sı API hatalarında exception fırlatmaz; { data, error } döner.
+    const { error } = await resendClient().emails.send({ from: GONDEREN_EMAIL, to, subject, html });
+
+    if (error) {
+      console.error("Email gönderim hatası:", error);
+      return { gonderildi: false, sebep: error.message };
+    }
+
     return { gonderildi: true };
   } catch (error) {
     console.error("Email gönderim hatası:", error);
