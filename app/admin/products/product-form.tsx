@@ -23,7 +23,7 @@ type ProductFormProps = {
   }) => Promise<{ success: boolean; message?: string }>;
 };
 
-const BOYUT_SECENEKLERI = ["XS", "S", "M", "L", "XL", "XXL", "90x90", "70x180", "Standart"];
+const BOYUT_SECENEKLERI = ["90x90", "70x70"];
 const SUPABASE_YAPILANDIRILMIS =
   typeof process !== "undefined" && Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
 

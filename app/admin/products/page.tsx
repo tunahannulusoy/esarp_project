@@ -32,8 +32,8 @@ export default function AdminProductsPage() {
         </Link>
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-xl bg-white shadow-sm">
-        <table className="w-full text-sm">
+      <div className="mt-6 overflow-x-auto rounded-xl bg-white shadow-sm">
+        <table className="w-full min-w-[640px] text-sm">
           <thead className="bg-stone-50 text-left text-stone-500">
             <tr>
               <th className="px-4 py-3">Görsel</th>
@@ -66,7 +66,7 @@ export default function AdminProductsPage() {
                     {urun.aktif ? "Aktif" : "Pasif"}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="whitespace-nowrap px-4 py-3 text-right">
                   <Link href={`/admin/products/${urun.id}`} className="mr-3 font-medium text-blue-600 hover:underline">
                     Düzenle
                   </Link>

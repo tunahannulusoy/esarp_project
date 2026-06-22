@@ -25,8 +25,8 @@ export default function AdminOrdersPage() {
     <div>
       <h1 className="text-2xl font-semibold text-stone-900">Siparişler</h1>
 
-      <div className="mt-6 overflow-hidden rounded-xl bg-white shadow-sm">
-        <table className="w-full text-sm">
+      <div className="mt-6 overflow-x-auto rounded-xl bg-white shadow-sm">
+        <table className="w-full min-w-[560px] text-sm">
           <thead className="bg-stone-50 text-left text-stone-500">
             <tr>
               <th className="px-4 py-3">Sipariş No</th>
@@ -49,7 +49,7 @@ export default function AdminOrdersPage() {
                     {siparis.durum}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="whitespace-nowrap px-4 py-3 text-right">
                   <Link href={`/admin/orders/${siparis.id}`} className="font-medium text-blue-600 hover:underline">
                     Detay
                   </Link>
