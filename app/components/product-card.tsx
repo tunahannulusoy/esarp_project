@@ -85,19 +85,24 @@ export default function ProductCard({ urun }: { urun: Urun }) {
           <span className="text-sm font-semibold text-stone-900">{fiyatFormatla(indirimliFiyat)}</span>
         </div>
 
-        <button
-          type="button"
-          disabled={urun.stok === 0}
-          onClick={handleSepetToggle}
-          aria-label={urun.stok === 0 ? "Stokta yok" : sepette ? "Sepetten çıkar" : "Sepete ekle"}
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition disabled:cursor-not-allowed disabled:border disabled:border-stone-200 disabled:bg-stone-100 disabled:text-stone-300 ${
-            sepette
-              ? "bg-stone-900 text-white hover:bg-stone-700"
-              : "border border-stone-300 text-stone-700 hover:border-stone-900 hover:text-stone-900"
-          }`}
-        >
-          <ShoppingCart className="h-4 w-4" strokeWidth={1.5} />
-        </button>
+        {urun.stok === 0 ? (
+          <span className="shrink-0 rounded-full bg-stone-100 px-3 py-1.5 text-xs font-medium text-stone-400">
+            Stokta Yok
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={handleSepetToggle}
+            aria-label={sepette ? "Sepetten çıkar" : "Sepete ekle"}
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition ${
+              sepette
+                ? "bg-stone-900 text-white hover:bg-stone-700"
+                : "border border-stone-300 text-stone-700 hover:border-stone-900 hover:text-stone-900"
+            }`}
+          >
+            <ShoppingCart className="h-4 w-4" strokeWidth={1.5} />
+          </button>
+        )}
       </div>
     </div>
   );
