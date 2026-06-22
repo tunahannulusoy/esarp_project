@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/app/lib/supabase/client";
 
@@ -11,17 +12,26 @@ const supabaseYapilandirilmisMi = Boolean(
 export function useSession() {
   const [user, setUser] = useState<User | null>(null);
   const [yukleniyor, setYukleniyor] = useState(supabaseYapilandirilmisMi);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!supabaseYapilandirilmisMi) return;
 
     const supabase = createClient();
 
+    // Sunucu action'ları (signIn/logout) cookie'leri sunucu tarafında günceller;
+    // onAuthStateChange bunu yakalamaz. Bu yüzden her sayfa geçişinde
+    // session'ı cookie'lerden tekrar okuyoruz.
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
       setYukleniyor(false);
     });
+  }, [pathname]);
 
+  useEffect(() => {
+    if (!supabaseYapilandirilmisMi) return;
+
+    const supabase = createClient();
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
