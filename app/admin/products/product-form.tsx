@@ -2,13 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { Urun } from "@/app/types";
+import type { Urun, UrunResim } from "@/app/types";
 import { productSchema } from "@/app/lib/validation";
 import { adminKategorileriGetir } from "@/app/lib/admin-categories";
+import { yeniUrunIdOlustur } from "@/app/lib/admin-products";
+import { urunResmiYukle } from "@/app/actions/upload";
 
 type ProductFormProps = {
   baslangicDeger?: Urun;
   onKaydet: (veri: {
+    id: string;
     ad: string;
     aciklama: string;
     fiyat: number;
@@ -17,17 +20,26 @@ type ProductFormProps = {
     renkler: { ad: string; hex: string }[];
     boyutlar: string[];
     stok: number;
+    resim_linkler?: UrunResim[];
   }) => void;
 };
 
 const BOYUT_SECENEKLERI = ["XS", "S", "M", "L", "XL", "XXL", "90x90", "70x180", "Standart"];
+const SUPABASE_YAPILANDIRILMIS =
+  typeof process !== "undefined" && Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
 
 export default function ProductForm({ baslangicDeger, onKaydet }: ProductFormProps) {
   const router = useRouter();
   const kategoriler = adminKategorileriGetir();
   const [hata, setHata] = useState<string | null>(null);
+  const [kaydediliyor, setKaydediliyor] = useState(false);
   const [secilenBoyutlar, setSecilenBoyutlar] = useState<string[]>(baslangicDeger?.boyutlar ?? []);
   const [renkler, setRenkler] = useState(baslangicDeger?.renkler ?? [{ ad: "", hex: "#000000" }]);
+  const [urunId] = useState(() => baslangicDeger?.id ?? yeniUrunIdOlustur());
+  const [secilenDosyalar, setSecilenDosyalar] = useState<(File | null)[]>([null, null, null, null]);
+  const [onizlemeler, setOnizlemeler] = useState<(string | null)[]>(
+    [1, 2, 3, 4].map((sira) => baslangicDeger?.resim_linkler.find((r) => r.sira === sira)?.url ?? null)
+  );
 
   const boyutToggle = (boyut: string) => {
     setSecilenBoyutlar((mevcut) =>
@@ -41,7 +53,14 @@ export default function ProductForm({ baslangicDeger, onKaydet }: ProductFormPro
     setRenkler((mevcut) => mevcut.map((r, i) => (i === index ? { ...r, [alan]: deger } : r)));
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const dosyaSec = (index: number, dosya: File | null) => {
+    setSecilenDosyalar((mevcut) => mevcut.map((d, i) => (i === index ? dosya : d)));
+    setOnizlemeler((mevcut) =>
+      mevcut.map((o, i) => (i === index ? (dosya ? URL.createObjectURL(dosya) : o) : o))
+    );
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setHata(null);
 
@@ -64,13 +83,82 @@ export default function ProductForm({ baslangicDeger, onKaydet }: ProductFormPro
       return;
     }
 
-    onKaydet({ ...parsed.data, renkler: gecerliRenkler });
+    setKaydediliyor(true);
+
+    let resim_linkler: UrunResim[] | undefined;
+
+    const yuklenecekVarMi = secilenDosyalar.some((d) => d !== null);
+    if (yuklenecekVarMi) {
+      if (!SUPABASE_YAPILANDIRILMIS) {
+        setHata("Görsel yüklemek için Supabase yapılandırılmış olmalı.");
+        setKaydediliyor(false);
+        return;
+      }
+
+      try {
+        const sonuclar = await Promise.all(
+          secilenDosyalar.map(async (dosya, i) => {
+            const sira = i + 1;
+            if (!dosya) {
+              const mevcut = baslangicDeger?.resim_linkler.find((r) => r.sira === sira);
+              return mevcut ?? null;
+            }
+            const sonuc = await urunResmiYukle(urunId, sira, dosya);
+            if (!sonuc.success) throw new Error(sonuc.message);
+            return { url: sonuc.url, sira };
+          })
+        );
+        resim_linkler = sonuclar.filter((r): r is UrunResim => r !== null);
+      } catch (err) {
+        setHata(err instanceof Error ? err.message : "Görsel yüklenemedi");
+        setKaydediliyor(false);
+        return;
+      }
+    }
+
+    onKaydet({
+      id: urunId,
+      ...parsed.data,
+      renkler: gecerliRenkler,
+      ...(resim_linkler ? { resim_linkler } : {}),
+    });
     router.push("/admin/products");
   };
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-5 rounded-xl bg-white p-6 shadow-sm">
       {hata && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{hata}</p>}
+
+      <div>
+        <span className="block text-sm font-medium text-stone-700">Ürün Görselleri</span>
+        {!SUPABASE_YAPILANDIRILMIS && (
+          <p className="mt-1 text-xs text-amber-600">
+            Supabase yapılandırılmadığı için görsel yükleme devre dışı; varsayılan placeholder görseller kullanılacak.
+          </p>
+        )}
+        <div className="mt-2 grid grid-cols-4 gap-3">
+          {[0, 1, 2, 3].map((index) => (
+            <label
+              key={index}
+              className="relative flex aspect-square cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-stone-300 bg-stone-50 text-xs text-stone-400 hover:border-stone-400"
+            >
+              {onizlemeler[index] ? (
+                // eslint-disable-next-line @next/next/no-img-element -- blob: önizleme URL'leri next/image remotePatterns ile uyumlu değil
+                <img src={onizlemeler[index]!} alt={`Görsel ${index + 1}`} className="h-full w-full object-cover" />
+              ) : (
+                <span>Görsel {index + 1}</span>
+              )}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                disabled={!SUPABASE_YAPILANDIRILMIS}
+                onChange={(e) => dosyaSec(index, e.target.files?.[0] ?? null)}
+                className="absolute inset-0 cursor-pointer opacity-0"
+              />
+            </label>
+          ))}
+        </div>
+      </div>
 
       <div>
         <label htmlFor="ad" className="block text-sm font-medium text-stone-700">
@@ -216,9 +304,10 @@ export default function ProductForm({ baslangicDeger, onKaydet }: ProductFormPro
 
       <button
         type="submit"
-        className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+        disabled={kaydediliyor}
+        className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
       >
-        Kaydet
+        {kaydediliyor ? "Kaydediliyor..." : "Kaydet"}
       </button>
     </form>
   );

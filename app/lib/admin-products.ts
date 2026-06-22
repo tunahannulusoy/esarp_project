@@ -1,4 +1,4 @@
-import type { Urun } from "@/app/types";
+import type { Urun, UrunResim } from "@/app/types";
 import { mockUrunler } from "@/app/lib/mock-data";
 
 const STORAGE_KEY = "esarp_admin_urunler";
@@ -26,6 +26,7 @@ export function adminUrunGetir(id: string): Urun | undefined {
 }
 
 type UrunFormVerisi = {
+  id: string;
   ad: string;
   aciklama: string;
   fiyat: number;
@@ -34,16 +35,22 @@ type UrunFormVerisi = {
   renkler: { ad: string; hex: string }[];
   boyutlar: string[];
   stok: number;
+  resim_linkler?: UrunResim[];
 };
 
+export function yeniUrunIdOlustur(): string {
+  return crypto.randomUUID();
+}
+
 export function adminUrunOlustur(veri: UrunFormVerisi): Urun {
+  const varsayilanResimler: UrunResim[] = [1, 2, 3, 4].map((sira) => ({
+    url: `https://placehold.co/600x600/png?text=${encodeURIComponent(veri.ad)}-${sira}`,
+    sira,
+  }));
+
   const yeni: Urun = {
     ...veri,
-    id: crypto.randomUUID(),
-    resim_linkler: [1, 2, 3, 4].map((sira) => ({
-      url: `https://placehold.co/600x600/png?text=${encodeURIComponent(veri.ad)}-${sira}`,
-      sira,
-    })),
+    resim_linkler: veri.resim_linkler && veri.resim_linkler.length > 0 ? veri.resim_linkler : varsayilanResimler,
     puan: 0,
     satis_adedi: 0,
     olusturulma_tarihi: new Date().toISOString(),

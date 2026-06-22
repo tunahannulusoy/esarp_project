@@ -24,6 +24,7 @@ function siparisleriYaz(siparisler: Siparis[]) {
 export function siparisOlustur(
   sepetOgeleri: SepetOgesi[],
   adres: Adres,
+  musteriAdi: string,
   musteriEmail: string | null = null
 ): Siparis {
   const urunlerToplami = sepetOgeleri.reduce((acc, oge) => {
@@ -40,6 +41,7 @@ export function siparisOlustur(
     siparis_no: siparisNoOlustur(),
     kullanici_id: "guest",
     musteri_email: musteriEmail,
+    musteri_adi: musteriAdi,
     adres_id: adres.id,
     urunler: sepetOgeleri.map((oge) => ({
       urun_id: oge.urun_id,

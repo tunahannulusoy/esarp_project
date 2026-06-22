@@ -18,6 +18,7 @@ export default function SortSelect() {
   const handleChange = (deger: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("siralama", deger);
+    params.delete("page");
     router.push(`/?${params.toString()}`, { scroll: false });
   };
 

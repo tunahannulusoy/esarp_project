@@ -1,7 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-export async function createClient() {
+export async function createClient(kaliciOturum = true) {
   const cookieStore = await cookies();
 
   return createServerClient(
@@ -14,9 +14,14 @@ export async function createClient() {
         },
         setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
+            cookiesToSet.forEach(({ name, value, options }) => {
+              // "Beni Hatırla" işaretli değilse tarayıcı kapanınca silinecek
+              // bir session cookie oluştur (maxAge/expires verilmez).
+              const cozulmusOptions = kaliciOturum
+                ? options
+                : { ...options, maxAge: undefined, expires: undefined };
+              cookieStore.set(name, value, cozulmusOptions);
+            });
           } catch {
             // Server Component'tan çağrıldığında set edilemez; middleware session'ı yeniler.
           }

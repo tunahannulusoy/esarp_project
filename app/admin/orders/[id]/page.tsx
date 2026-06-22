@@ -38,6 +38,10 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
   return (
     <div className="max-w-2xl">
       <h1 className="text-2xl font-semibold text-stone-900">Sipariş #{siparis.siparis_no}</h1>
+      <p className="mt-1 text-sm text-stone-600">
+        {siparis.musteri_adi}
+        {siparis.musteri_email && ` · ${siparis.musteri_email}`}
+      </p>
 
       <div className="mt-4">
         <label htmlFor="durum" className="block text-sm font-medium text-stone-700">

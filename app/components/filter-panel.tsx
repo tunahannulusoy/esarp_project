@@ -30,6 +30,7 @@ export default function FilterPanel({ kategoriler, renkler, boyutlar }: FilterPa
     } else {
       params.set(anahtar, deger);
     }
+    params.delete("page");
     router.push(`/?${params.toString()}`, { scroll: false });
   };
 

@@ -82,6 +82,7 @@ export type Siparis = {
   siparis_no: string;
   kullanici_id: string;
   musteri_email: string | null;
+  musteri_adi: string;
   adres_id: string;
   urunler: SiparisUrun[];
   urunler_toplami: number;

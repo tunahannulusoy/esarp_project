@@ -74,7 +74,8 @@ export async function signIn(_prevState: AuthFormState, formData: FormData): Pro
     return { success: false, message: SUPABASE_BAGLANTI_YOK_MESAJI };
   }
 
-  const supabase = await createClient();
+  const beniHatirla = formData.get("remember") === "on";
+  const supabase = await createClient(beniHatirla);
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/app/lib/cart-context";
 import { useAddresses } from "@/app/lib/address-context";
@@ -13,18 +13,28 @@ import { siparisOlusturulduBildirimGonder } from "@/app/actions/orders";
 import AddressForm from "@/app/components/address-form";
 import { useSession } from "@/app/lib/use-session";
 import SignInModal from "@/app/components/sign-in-modal";
+import { useProfile } from "@/app/lib/profile-context";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, sepetiTemizle } = useCart();
   const { adresler, adresEkle } = useAddresses();
   const { girisYapilmis, yukleniyor, user } = useSession();
+  const { profil, profilGuncelle } = useProfile();
 
   const [seciliAdresId, setSeciliAdresId] = useState<string | null>(
     adresler.find((a) => a.varsayilan)?.id ?? adresler[0]?.id ?? null
   );
   const [formAcik, setFormAcik] = useState(adresler.length === 0);
   const [gonderiliyor, setGonderiliyor] = useState(false);
+  const [ad, setAd] = useState("");
+  const [soyad, setSoyad] = useState("");
+  const [adHata, setAdHata] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (profil.ad) setAd((mevcut) => mevcut || profil.ad);
+    if (profil.soyad) setSoyad((mevcut) => mevcut || profil.soyad);
+  }, [profil.ad, profil.soyad]);
 
   const sepetOgeleri = useMemo(
     () =>
@@ -47,10 +57,21 @@ export default function CheckoutPage() {
   const kargoUcreti = seciliAdres ? kargoUcretiHesapla(seciliAdres.il) : null;
   const toplamTutar = urunlerToplami + (kargoUcreti ?? 0);
 
+  const adGecerliMi = ad.trim().length > 0 && soyad.trim().length > 0;
+
   const handleSiparisOlustur = () => {
     if (!seciliAdres || sepetOgeleri.length === 0) return;
+
+    if (!adGecerliMi) {
+      setAdHata("Ad ve soyad girilmesi zorunludur.");
+      return;
+    }
+    setAdHata(null);
+
     setGonderiliyor(true);
-    const siparis = siparisOlustur(sepetOgeleri, seciliAdres, user?.email ?? null);
+    const musteriAdiSoyadi = `${ad.trim()} ${soyad.trim()}`;
+    profilGuncelle({ ...profil, ad: ad.trim(), soyad: soyad.trim() });
+    const siparis = siparisOlustur(sepetOgeleri, seciliAdres, musteriAdiSoyadi, user?.email ?? null);
     sepetiTemizle();
 
     const adresMetni = `${seciliAdres.acik_adres}, ${seciliAdres.mahalle}, ${seciliAdres.ilce}/${seciliAdres.il}`;
@@ -88,6 +109,37 @@ export default function CheckoutPage() {
 
       <div className="mt-6 grid gap-8 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
+          <section className="rounded-xl border border-stone-200 p-4">
+            <h2 className="text-lg font-medium text-stone-900">Müşteri Bilgileri</h2>
+            {adHata && <p className="mt-2 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{adHata}</p>}
+            <div className="mt-3 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="musteri-ad" className="block text-sm font-medium text-stone-700">
+                  Ad
+                </label>
+                <input
+                  id="musteri-ad"
+                  required
+                  value={ad}
+                  onChange={(e) => setAd(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-stone-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label htmlFor="musteri-soyad" className="block text-sm font-medium text-stone-700">
+                  Soyad
+                </label>
+                <input
+                  id="musteri-soyad"
+                  required
+                  value={soyad}
+                  onChange={(e) => setSoyad(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-stone-500 focus:outline-none"
+                />
+              </div>
+            </div>
+          </section>
+
           <section>
             <h2 className="text-lg font-medium text-stone-900">Teslimat Adresi</h2>
 
