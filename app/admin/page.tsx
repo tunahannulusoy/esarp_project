@@ -33,11 +33,11 @@ export default function AdminDashboardPage() {
     <div>
       <h1 className="text-2xl font-semibold text-stone-900">Dashboard</h1>
 
-      <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {kartlar.map((kart) => (
-          <div key={kart.etiket} className="rounded-xl bg-white p-5 shadow-sm">
+          <div key={kart.etiket} className="overflow-hidden rounded-xl bg-white p-5 shadow-sm">
             <p className="text-sm text-stone-500">{kart.etiket}</p>
-            <p className="mt-2 text-2xl font-semibold text-stone-900">{kart.deger}</p>
+            <p className="mt-2 truncate text-2xl font-semibold text-stone-900">{kart.deger}</p>
           </div>
         ))}
       </div>

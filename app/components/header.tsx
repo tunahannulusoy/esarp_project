@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { ChevronDown, Heart, LogOut, MapPin, Menu, Package, Search, ShoppingCart, User } from "lucide-react";
 import { useCart } from "@/app/lib/cart-context";
@@ -10,6 +11,7 @@ import { useClearLocalSession } from "@/app/lib/use-clear-local-session";
 import { logout } from "@/app/actions/auth";
 
 export default function Header() {
+  const pathname = usePathname();
   const [menuAcik, setMenuAcik] = useState(false);
   const [profilMenuAcik, setProfilMenuAcik] = useState(false);
   const { toplamAdet } = useCart();
@@ -18,6 +20,10 @@ export default function Header() {
   const temizleYerelOturum = useClearLocalSession();
   const sepetSayisi = toplamAdet;
   const favoriSayisi = favoriUrunIdleri.length;
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   const handleCikisYap = async () => {
     await istemciTarafindaCikisYap();
