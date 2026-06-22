@@ -13,6 +13,7 @@ type AddressContextValue = {
   adresGuncelle: (id: string, adres: YeniAdres) => void;
   adresSil: (id: string) => void;
   varsayilanYap: (id: string) => void;
+  adresleriTemizle: () => void;
 };
 
 const AddressContext = createContext<AddressContextValue | null>(null);
@@ -74,9 +75,11 @@ export function AddressProvider({ children }: { children: React.ReactNode }) {
     setAdresler((mevcut) => mevcut.map((a) => ({ ...a, varsayilan: a.id === id })));
   }, []);
 
+  const adresleriTemizle = useCallback(() => setAdresler([]), []);
+
   const value = useMemo(
-    () => ({ adresler, adresEkle, adresGuncelle, adresSil, varsayilanYap }),
-    [adresler, adresEkle, adresGuncelle, adresSil, varsayilanYap]
+    () => ({ adresler, adresEkle, adresGuncelle, adresSil, varsayilanYap, adresleriTemizle }),
+    [adresler, adresEkle, adresGuncelle, adresSil, varsayilanYap, adresleriTemizle]
   );
 
   return <AddressContext.Provider value={value}>{children}</AddressContext.Provider>;

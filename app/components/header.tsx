@@ -6,6 +6,7 @@ import { ChevronDown, Heart, LogOut, MapPin, Menu, Package, Search, ShoppingCart
 import { useCart } from "@/app/lib/cart-context";
 import { useFavorites } from "@/app/lib/favorites-context";
 import { useSession, istemciTarafindaCikisYap } from "@/app/lib/use-session";
+import { useClearLocalSession } from "@/app/lib/use-clear-local-session";
 import { logout } from "@/app/actions/auth";
 
 export default function Header() {
@@ -14,11 +15,13 @@ export default function Header() {
   const { toplamAdet } = useCart();
   const { favoriUrunIdleri } = useFavorites();
   const { girisYapilmis } = useSession();
+  const temizleYerelOturum = useClearLocalSession();
   const sepetSayisi = toplamAdet;
   const favoriSayisi = favoriUrunIdleri.length;
 
   const handleCikisYap = async () => {
     await istemciTarafindaCikisYap();
+    temizleYerelOturum();
     await logout();
   };
 

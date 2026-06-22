@@ -4,6 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import { LogOut } from "lucide-react";
 import { deleteAccount, logout, updateEmail, updatePassword, type AuthFormState } from "@/app/actions/auth";
 import { istemciTarafindaCikisYap } from "@/app/lib/use-session";
+import { useClearLocalSession } from "@/app/lib/use-clear-local-session";
 
 const baslangicState: AuthFormState = { success: false };
 const BILDIRIM_STORAGE_KEY = "esarp_bildirim_tercihleri";
@@ -11,9 +12,11 @@ const BILDIRIM_STORAGE_KEY = "esarp_bildirim_tercihleri";
 export default function SettingsPage() {
   const [emailState, emailAction, emailPending] = useActionState(updateEmail, baslangicState);
   const [passwordState, passwordAction, passwordPending] = useActionState(updatePassword, baslangicState);
+  const temizleYerelOturum = useClearLocalSession();
 
   const handleCikisYap = async () => {
     await istemciTarafindaCikisYap();
+    temizleYerelOturum();
     await logout();
   };
 
@@ -33,6 +36,9 @@ export default function SettingsPage() {
 
   const handleHesabiSil = async () => {
     setSilHata(null);
+    // deleteAccount başarılı olursa içeride redirect() çağırır ve bu satırdan
+    // sonraki kod hiç çalışmaz; bu yüzden yerel veriyi önceden temizliyoruz.
+    temizleYerelOturum();
     const sonuc = await deleteAccount();
     if (sonuc && !sonuc.success) {
       setSilHata(sonuc.message ?? "Hesap silinemedi");

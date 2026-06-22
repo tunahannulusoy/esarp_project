@@ -11,7 +11,7 @@ export type ProfilBilgisi = {
   telefon: string;
 };
 
-const VARSAYILAN_PROFIL: ProfilBilgisi = {
+export const VARSAYILAN_PROFIL: ProfilBilgisi = {
   ad: "",
   soyad: "",
   email: "",

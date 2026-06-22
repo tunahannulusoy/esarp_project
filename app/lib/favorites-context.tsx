@@ -9,6 +9,7 @@ type FavoritesContextValue = {
   favoriMi: (urunId: string) => boolean;
   favoriEkleCikar: (urunId: string) => void;
   favorilerdenCikar: (urunId: string) => void;
+  favorileriTemizle: () => void;
 };
 
 const FavoritesContext = createContext<FavoritesContextValue | null>(null);
@@ -45,9 +46,11 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     setFavoriUrunIdleri((mevcut) => mevcut.filter((id) => id !== urunId));
   }, []);
 
+  const favorileriTemizle = useCallback(() => setFavoriUrunIdleri([]), []);
+
   const value = useMemo(
-    () => ({ favoriUrunIdleri, favoriMi, favoriEkleCikar, favorilerdenCikar }),
-    [favoriUrunIdleri, favoriMi, favoriEkleCikar, favorilerdenCikar]
+    () => ({ favoriUrunIdleri, favoriMi, favoriEkleCikar, favorilerdenCikar, favorileriTemizle }),
+    [favoriUrunIdleri, favoriMi, favoriEkleCikar, favorilerdenCikar, favorileriTemizle]
   );
 
   return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;

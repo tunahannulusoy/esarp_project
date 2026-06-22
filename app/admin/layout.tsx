@@ -6,10 +6,12 @@ import { useState } from "react";
 import { FolderOpen, LayoutDashboard, LogOut, Package, ShoppingCart } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 import { istemciTarafindaCikisYap } from "@/app/lib/use-session";
+import { useClearLocalSession } from "@/app/lib/use-clear-local-session";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [cikisYapiliyor, setCikisYapiliyor] = useState(false);
+  const temizleYerelOturum = useClearLocalSession();
 
   if (pathname === "/admin/login") {
     return <>{children}</>;
@@ -18,6 +20,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const handleLogout = async () => {
     setCikisYapiliyor(true);
     await istemciTarafindaCikisYap();
+    temizleYerelOturum();
     await logout();
   };
 
