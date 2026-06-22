@@ -18,11 +18,26 @@ export async function urunResmiYukle(
     };
   }
 
-  await validateAdminRole();
+  try {
+    await validateAdminRole();
+  } catch (error) {
+    return { success: false, message: error instanceof Error ? error.message : "Admin erişimi yok" };
+  }
 
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
-  const { thumbnail, buyuk } = await urunResimVaryantlariUret(buffer);
+
+  let thumbnail: Buffer;
+  let buyuk: Buffer;
+  try {
+    ({ thumbnail, buyuk } = await urunResimVaryantlariUret(buffer));
+  } catch {
+    return {
+      success: false,
+      message:
+        "Bu görsel formatı işlenemedi (iPhone HEIC formatı desteklenmiyor). Lütfen JPEG, PNG veya WEBP olarak yükleyin — iPhone'da Ayarlar > Kamera > Biçimler > \"En Uyumlu\" seçeneğini kullanabilirsiniz.",
+    };
+  }
 
   const supabase = await createClient();
   const anaYol = `${urunId}/${urunId}_resim_${sira}.jpg`;
