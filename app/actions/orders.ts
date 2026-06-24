@@ -76,6 +76,17 @@ export async function createOrder(
     return { success: false, message: error.message };
   }
 
+  // Sipariş oluşturulunca stokları düşür
+  for (const oge of sepetOgeleri) {
+    const { data: urun } = await supabase.from("urunler").select("stok").eq("id", oge.urun_id).single();
+    if (urun) {
+      await supabase
+        .from("urunler")
+        .update({ stok: Math.max(0, urun.stok - oge.adet) })
+        .eq("id", oge.urun_id);
+    }
+  }
+
   return { success: true, siparis: data as Siparis };
 }
 
@@ -125,6 +136,28 @@ export async function updateOrderStatus(id: string, durum: SiparisDurum): Promis
   }
 
   const supabase = await createClient();
+
+  // İptal durumuna geçişte stokları geri yükle
+  if (durum === "İptal Edildi") {
+    const { data: mevcutSiparis } = await supabase
+      .from("siparisler")
+      .select("urunler, durum")
+      .eq("id", id)
+      .single();
+
+    if (mevcutSiparis && mevcutSiparis.durum !== "İptal Edildi") {
+      for (const oge of mevcutSiparis.urunler as SiparisUrun[]) {
+        const { data: urun } = await supabase.from("urunler").select("stok").eq("id", oge.urun_id).single();
+        if (urun) {
+          await supabase
+            .from("urunler")
+            .update({ stok: urun.stok + oge.adet })
+            .eq("id", oge.urun_id);
+        }
+      }
+    }
+  }
+
   const { data, error } = await supabase
     .from("siparisler")
     .update({ durum, guncelleme_tarihi: new Date().toISOString() })
