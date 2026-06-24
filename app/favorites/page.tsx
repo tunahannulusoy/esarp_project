@@ -47,7 +47,7 @@ export default function FavoritesPage() {
   }
 
   return (
-    <div>
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl font-semibold text-stone-900">Beğendiklerim</h1>
 
