@@ -14,7 +14,7 @@ export default function Header() {
   const pathname = usePathname();
   const [menuAcik, setMenuAcik] = useState(false);
   const [profilMenuAcik, setProfilMenuAcik] = useState(false);
-  const { toplamAdet, yuklendi: sepetYuklendi } = useCart();
+  const { toplamAdet, sunucuYuklendi: sepetYuklendi } = useCart();
   const { favoriUrunIdleri, yuklendi: favoriYuklendi } = useFavorites();
   const { girisYapilmis } = useSession();
   const temizleYerelOturum = useClearLocalSession();
