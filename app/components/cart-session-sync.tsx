@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSession } from "@/app/lib/use-session";
 import { useCart } from "@/app/lib/cart-context";
-import { mergeServerCart, saveServerCart } from "@/app/actions/cart";
+import { getServerCart, mergeServerCart, saveServerCart } from "@/app/actions/cart";
 
 export const SEPET_BIRLESTIRME_ANAHTARI = "esarp_sepet_birlestirildi";
 
@@ -13,41 +13,41 @@ export default function CartSessionSync() {
   const itemsRef = useRef(items);
   itemsRef.current = items;
 
-  // Giriş yapılınca yerel sepet sunucuyla tek atomik istekte birleştirilene
-  // kadar otomatik kaydetme effect'i devre dışı kalır. Aksi halde, sunucu
-  // henüz cevap vermeden tetiklenen bir kaydetme, eski/yarım sepeti
-  // sunucuya geri yazıp asıl veriyi ezebilir.
-  const [birlestirmeHazir, setBirlestirmeHazir] = useState(false);
+  // Yalnızca kullanıcı sepeti değiştirince (load/merge'den sonra) DB'ye kaydet.
+  const [kayitHazir, setKayitHazir] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
-
-    // Bu bayrak sessionStorage'da tutuluyor (useRef değil) çünkü bir
-    // useRef, sayfa her yenilendiğinde sıfırlanır — bu da zaten birleşmiş
-    // sepeti her refresh'te yeniden "birleştirip" adetleri tekrar tekrar
-    // toplamaya (her yenilemede ürün sayısının artmasına) yol açıyordu.
-    // sessionStorage aynı sekme/oturum boyunca kalıcı, gerçek çıkışta
-    // (useClearLocalSession) temizleniyor.
-    if (sessionStorage.getItem(SEPET_BIRLESTIRME_ANAHTARI) === user.id) {
-      setBirlestirmeHazir(true);
+    if (!user) {
+      setKayitHazir(false);
       return;
     }
 
-    setBirlestirmeHazir(false);
+    const zatenBirlesti = sessionStorage.getItem(SEPET_BIRLESTIRME_ANAHTARI) === user.id;
 
-    (async () => {
-      const birlesik = await mergeServerCart(itemsRef.current);
-      // yerelKayitKapat=true → localStorage temizlenir ve artık yazılmaz
-      sepetiAyarla(birlesik, true);
-      sessionStorage.setItem(SEPET_BIRLESTIRME_ANAHTARI, user.id);
-      setBirlestirmeHazir(true);
-    })();
+    if (zatenBirlesti) {
+      // Sayfa yenilemesi: localStorage boş olabilir, DB'den yükle.
+      (async () => {
+        const sunucuSepet = await getServerCart();
+        sepetiAyarla(sunucuSepet, true); // localStorage'a yazma
+        setKayitHazir(true);
+      })();
+    } else {
+      // İlk giriş: misafir sepetiyle DB'yi birleştir.
+      setKayitHazir(false);
+      (async () => {
+        const birlesik = await mergeServerCart(itemsRef.current);
+        sepetiAyarla(birlesik, true); // localStorage'a yazma
+        sessionStorage.setItem(SEPET_BIRLESTIRME_ANAHTARI, user.id);
+        setKayitHazir(true);
+      })();
+    }
   }, [user, sepetiAyarla]);
 
+  // Yalnızca yükleme/merge tamamlandıktan sonra yapılan değişiklikleri kaydet.
   useEffect(() => {
-    if (!user || !birlestirmeHazir) return;
+    if (!user || !kayitHazir) return;
     saveServerCart(items);
-  }, [items, user, birlestirmeHazir]);
+  }, [items, user, kayitHazir]);
 
   return null;
 }
