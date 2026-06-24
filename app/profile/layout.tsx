@@ -9,7 +9,7 @@ const SEKMELER = [
   { href: "/profile", etiket: "Profilim" },
   { href: "/profile/addresses", etiket: "Adreslerim" },
   { href: "/profile/orders", etiket: "Siparişlerim" },
-  { href: "/profile/favorites", etiket: "Beğendiklerim" },
+  { href: "/favorites", etiket: "Beğendiklerim" },
   { href: "/profile/settings", etiket: "Hesap Ayarları" },
 ];
 

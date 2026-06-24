@@ -51,7 +51,7 @@ export default function Header() {
         </form>
 
         <nav className="ml-auto flex items-center gap-4 text-sm">
-          <Link href="/profile/favorites" className="hidden items-center gap-1 sm:flex" aria-label="Beğendiklerim">
+          <Link href="/favorites" className="hidden items-center gap-1 sm:flex" aria-label="Beğendiklerim">
             <Heart className="h-5 w-5" strokeWidth={1.5} />
             {favoriYuklendi ? (
               <span>{favoriUrunIdleri.length}</span>
