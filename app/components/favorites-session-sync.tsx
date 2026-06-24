@@ -32,6 +32,7 @@ export default function FavoritesSessionSync() {
       if (yereldeOlupSunucudaOlmayanlar.length > 0) {
         await syncFavorites(yereldeOlupSunucudaOlmayanlar);
       }
+      localStorage.removeItem("esarp_favoriler");
     })();
   }, [user, favoriDisaridanBirlestir]);
 

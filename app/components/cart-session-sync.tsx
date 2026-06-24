@@ -38,6 +38,7 @@ export default function CartSessionSync() {
     (async () => {
       const birlesik = await mergeServerCart(itemsRef.current);
       sepetiAyarla(birlesik);
+      localStorage.removeItem("esarp_sepet");
       sessionStorage.setItem(SEPET_BIRLESTIRME_ANAHTARI, user.id);
       setBirlestirmeHazir(true);
     })();
