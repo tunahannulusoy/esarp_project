@@ -26,6 +26,10 @@ export default function Header() {
   const handleCikisYap = async () => {
     sepetiTemizle();
     favorileriTemizle();
+    localStorage.removeItem("esarp_sepet");
+    localStorage.removeItem("esarp_favoriler");
+    sessionStorage.removeItem("esarp_sepet_birlestirildi");
+    sessionStorage.removeItem("esarp_favoriler_birlestirildi");
     await istemciTarafindaCikisYap();
     temizleYerelOturum();
     await logout();
