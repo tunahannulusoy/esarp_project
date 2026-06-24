@@ -150,13 +150,13 @@ export default function ProductForm({ baslangicDeger, onKaydet }: ProductFormPro
           {[0, 1, 2, 3].map((index) => (
             <label
               key={index}
-              className="relative flex aspect-square cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-stone-300 bg-stone-50 text-xs text-stone-400 hover:border-stone-400"
+              className="relative flex cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-stone-300 bg-stone-50 text-xs text-stone-400 hover:border-stone-400"
             >
               {onizlemeler[index] ? (
                 // eslint-disable-next-line @next/next/no-img-element -- blob: önizleme URL'leri next/image remotePatterns ile uyumlu değil
-                <img src={onizlemeler[index]!} alt={`Görsel ${index + 1}`} className="h-full w-full object-contain" />
+                <img src={onizlemeler[index]!} alt={`Görsel ${index + 1}`} className="h-auto w-full" />
               ) : (
-                <span>Görsel {index + 1}</span>
+                <span className="py-10">Görsel {index + 1}</span>
               )}
               <input
                 type="file"

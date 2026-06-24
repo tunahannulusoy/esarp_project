@@ -49,8 +49,8 @@ export default function AdminProductsPage() {
               <tr key={urun.id} className="border-t border-stone-100">
                 <td className="px-4 py-3">
                   {urun.resim_linkler[0] && (
-                    <div className="relative h-12 w-12 overflow-hidden rounded-lg bg-stone-100">
-                      <Image src={urun.resim_linkler[0].url} alt={urun.ad} fill sizes="48px" className="object-cover" />
+                    <div className="w-12 overflow-hidden rounded-lg bg-stone-100">
+                      <Image src={urun.resim_linkler[0].url} alt={urun.ad} width={48} height={48} sizes="48px" className="h-auto w-full" />
                     </div>
                   )}
                 </td>
