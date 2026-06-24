@@ -50,11 +50,10 @@ export default function FavoritesSessionSync() {
       if (!zatenBirlesti) {
         // İlk giriş: misafir favorilerini DB ile birleştir
         const yerel = yerelFavorileriOku();
-        const sadeceYerelde = yerel.filter((id) => !sunucuFavorileri.includes(id));
-        if (sadeceYerelde.length > 0) await syncFavorites(sadeceYerelde);
+        const birlesik = await syncFavorites(yerel);
         localStorage.removeItem(STORAGE_KEY);
         sessionStorage.setItem(BIRLESTIRME_ANAHTARI, user.id);
-        setFavoriler(Array.from(new Set([...sunucuFavorileri, ...yerel])));
+        setFavoriler(birlesik);
       } else {
         // Sayfa yenilemesi: DB'den yükle
         setFavoriler(sunucuFavorileri);
