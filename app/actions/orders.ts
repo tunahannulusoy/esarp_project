@@ -82,7 +82,7 @@ export async function createOrder(
     if (urun) {
       await supabase
         .from("urunler")
-        .update({ stok: Math.max(0, urun.stok - oge.adet) })
+        .update({ stok: urun.stok - oge.adet })
         .eq("id", oge.urun_id);
     }
   }
