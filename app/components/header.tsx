@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronDown, Heart, LogOut, MapPin, Menu, Package, Search, ShoppingCart, User } from "lucide-react";
 import { useCart } from "@/app/lib/cart-context";
 import { useFavorites } from "@/app/lib/favorites-context";
@@ -18,6 +18,10 @@ export default function Header() {
   const { favoriUrunIdleri, yuklendi: favoriYuklendi } = useFavorites();
   const { girisYapilmis } = useSession();
   const temizleYerelOturum = useClearLocalSession();
+
+  useEffect(() => {
+    setProfilMenuAcik(false);
+  }, [girisYapilmis]);
 
   if (pathname?.startsWith("/admin")) {
     return null;
