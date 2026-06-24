@@ -3,15 +3,17 @@
 import { useEffect, useState } from "react";
 import type { Kategori } from "@/app/types";
 import { createCategory, deleteCategory, getAdminCategories } from "@/app/actions/categories";
+import AdminSpinner from "@/app/admin/components/admin-spinner";
 
 export default function AdminCategoriesPage() {
   const [kategoriler, setKategoriler] = useState<Kategori[]>([]);
+  const [yukleniyor, setYukleniyor] = useState(true);
   const [ad, setAd] = useState("");
   const [aciklama, setAciklama] = useState("");
   const [hata, setHata] = useState<string | null>(null);
 
   useEffect(() => {
-    getAdminCategories().then(setKategoriler);
+    getAdminCategories().then((data) => { setKategoriler(data); setYukleniyor(false); });
   }, []);
 
   const handleEkle = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -35,6 +37,8 @@ export default function AdminCategoriesPage() {
     await deleteCategory(id);
     getAdminCategories().then(setKategoriler);
   };
+
+  if (yukleniyor) return <AdminSpinner />;
 
   return (
     <div>

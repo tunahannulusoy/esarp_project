@@ -5,20 +5,22 @@ import { getAdminProducts } from "@/app/actions/products";
 import { getAllOrdersAdmin } from "@/app/actions/orders";
 import type { Siparis } from "@/app/types";
 import { fiyatFormatla } from "@/app/lib/utils";
+import AdminSpinner from "@/app/admin/components/admin-spinner";
 
 export default function AdminDashboardPage() {
   const [urunSayisi, setUrunSayisi] = useState(0);
   const [siparisSayisi, setSiparisSayisi] = useState(0);
   const [toplamGelir, setToplamGelir] = useState(0);
   const [bekleyenSiparis, setBekleyenSiparis] = useState(0);
+  const [yukleniyor, setYukleniyor] = useState(true);
 
   useEffect(() => {
-    getAdminProducts().then((urunler) => setUrunSayisi(urunler.length));
-
-    getAllOrdersAdmin().then((siparisler: Siparis[]) => {
+    Promise.all([getAdminProducts(), getAllOrdersAdmin()]).then(([urunler, siparisler]: [any[], Siparis[]]) => {
+      setUrunSayisi(urunler.length);
       setSiparisSayisi(siparisler.length);
       setToplamGelir(siparisler.reduce((acc, s) => acc + s.toplam_tutar, 0));
       setBekleyenSiparis(siparisler.filter((s) => s.durum === "Ödeme Bekleme").length);
+      setYukleniyor(false);
     });
   }, []);
 
@@ -28,6 +30,8 @@ export default function AdminDashboardPage() {
     { etiket: "Toplam Gelir", deger: fiyatFormatla(toplamGelir) },
     { etiket: "Ödeme Bekleyen", deger: bekleyenSiparis },
   ];
+
+  if (yukleniyor) return <AdminSpinner />;
 
   return (
     <div>

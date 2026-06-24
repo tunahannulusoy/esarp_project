@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { Siparis } from "@/app/types";
 import { getAllOrdersAdmin } from "@/app/actions/orders";
 import { fiyatFormatla } from "@/app/lib/utils";
+import AdminSpinner from "@/app/admin/components/admin-spinner";
 
 const DURUM_RENGI: Record<Siparis["durum"], string> = {
   "Ödeme Bekleme": "bg-amber-100 text-amber-700",
@@ -16,10 +17,13 @@ const DURUM_RENGI: Record<Siparis["durum"], string> = {
 
 export default function AdminOrdersPage() {
   const [siparisler, setSiparisler] = useState<Siparis[]>([]);
+  const [yukleniyor, setYukleniyor] = useState(true);
 
   useEffect(() => {
-    getAllOrdersAdmin().then(setSiparisler);
+    getAllOrdersAdmin().then((data) => { setSiparisler(data); setYukleniyor(false); });
   }, []);
+
+  if (yukleniyor) return <AdminSpinner />;
 
   return (
     <div>

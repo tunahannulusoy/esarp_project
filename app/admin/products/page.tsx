@@ -6,12 +6,14 @@ import { useEffect, useState } from "react";
 import type { Urun } from "@/app/types";
 import { deleteProduct, getAdminProducts } from "@/app/actions/products";
 import { fiyatFormatla } from "@/app/lib/utils";
+import AdminSpinner from "@/app/admin/components/admin-spinner";
 
 export default function AdminProductsPage() {
   const [urunler, setUrunler] = useState<Urun[]>([]);
+  const [yukleniyor, setYukleniyor] = useState(true);
 
   useEffect(() => {
-    getAdminProducts().then(setUrunler);
+    getAdminProducts().then((data) => { setUrunler(data); setYukleniyor(false); });
   }, []);
 
   const handleSil = async (id: string) => {
@@ -19,6 +21,8 @@ export default function AdminProductsPage() {
     await deleteProduct(id);
     getAdminProducts().then(setUrunler);
   };
+
+  if (yukleniyor) return <AdminSpinner />;
 
   return (
     <div>
