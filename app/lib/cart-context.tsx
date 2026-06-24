@@ -43,7 +43,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const ham = localStorage.getItem(STORAGE_KEY);
-      if (ham) setItems(JSON.parse(ham));
+      if (ham) {
+        const parsed: SepetUrun[] = JSON.parse(ham);
+        // Eski mock ID'leri (urun-1, urun-2 ...) içeren bozuk veriyi temizle
+        const gecerli = parsed.filter((o) => /^[0-9a-f-]{36}$/i.test(o.urun_id));
+        setItems(gecerli);
+      }
     } catch {
       // localStorage erişilemezse sessizce boş sepetle devam et
     } finally {
