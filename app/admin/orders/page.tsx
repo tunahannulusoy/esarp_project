@@ -29,8 +29,34 @@ export default function AdminOrdersPage() {
     <div>
       <h1 className="text-2xl font-semibold text-stone-900">Siparişler</h1>
 
-      <div className="mt-6 overflow-x-auto rounded-xl bg-white shadow-sm">
-        <table className="w-full min-w-[560px] text-sm">
+      {siparisler.length === 0 && (
+        <p className="mt-6 rounded-xl bg-white px-4 py-8 text-center text-stone-500 shadow-sm">Henüz sipariş yok.</p>
+      )}
+
+      {/* Mobil kart görünümü */}
+      <div className="mt-6 space-y-3 sm:hidden">
+        {siparisler.map((siparis) => (
+          <div key={siparis.id} className="rounded-xl bg-white p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-stone-900">#{siparis.siparis_no}</span>
+              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${DURUM_RENGI[siparis.durum]}`}>
+                {siparis.durum}
+              </span>
+            </div>
+            <div className="mt-2 flex items-center justify-between text-sm text-stone-500">
+              <span>{new Date(siparis.olusturulma_tarihi).toLocaleDateString("tr-TR")}</span>
+              <span className="font-medium text-stone-900">{fiyatFormatla(siparis.toplam_tutar)}</span>
+            </div>
+            <Link href={`/admin/orders/${siparis.id}`} className="mt-3 block text-sm font-medium text-blue-600 hover:underline">
+              Detayı Gör →
+            </Link>
+          </div>
+        ))}
+      </div>
+
+      {/* Masaüstü tablo görünümü */}
+      <div className="mt-6 hidden rounded-xl bg-white shadow-sm sm:block">
+        <table className="w-full text-sm">
           <thead className="bg-stone-50 text-left text-stone-500">
             <tr>
               <th className="px-4 py-3">Sipariş No</th>
@@ -53,7 +79,7 @@ export default function AdminOrdersPage() {
                     {siparis.durum}
                   </span>
                 </td>
-                <td className="whitespace-nowrap px-4 py-3 text-right">
+                <td className="px-4 py-3 text-right">
                   <Link href={`/admin/orders/${siparis.id}`} className="font-medium text-blue-600 hover:underline">
                     Detay
                   </Link>
@@ -62,8 +88,6 @@ export default function AdminOrdersPage() {
             ))}
           </tbody>
         </table>
-
-        {siparisler.length === 0 && <p className="px-4 py-8 text-center text-stone-500">Henüz sipariş yok.</p>}
       </div>
     </div>
   );
