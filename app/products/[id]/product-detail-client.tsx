@@ -33,9 +33,9 @@ export default function ProductDetailClient({ urun }: { urun: Urun }) {
   return (
     <div className="grid gap-8 lg:grid-cols-2">
       <div>
-        <div className="relative aspect-square overflow-hidden rounded-xl bg-stone-100">
+        <div className="overflow-hidden rounded-xl bg-white">
           {aktifResim && (
-            <Image src={aktifResim} alt={urun.ad} fill sizes="50vw" className="object-cover" priority />
+            <Image src={aktifResim} alt={urun.ad} width={900} height={900} sizes="50vw" className="h-auto w-full" priority />
           )}
         </div>
         <div className="mt-3 grid grid-cols-4 gap-2">
