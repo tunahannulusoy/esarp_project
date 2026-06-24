@@ -37,8 +37,8 @@ export default function CartSessionSync() {
 
     (async () => {
       const birlesik = await mergeServerCart(itemsRef.current);
-      sepetiAyarla(birlesik);
-      localStorage.removeItem("esarp_sepet");
+      // yerelKayitKapat=true → localStorage temizlenir ve artık yazılmaz
+      sepetiAyarla(birlesik, true);
       sessionStorage.setItem(SEPET_BIRLESTIRME_ANAHTARI, user.id);
       setBirlestirmeHazir(true);
     })();

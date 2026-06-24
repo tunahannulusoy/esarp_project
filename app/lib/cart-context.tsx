@@ -15,7 +15,7 @@ type CartContextValue = {
   sepetiTemizle: () => void;
   sepetteMi: (urunId: string) => boolean;
   sepetiDisaridanBirlestir: (sunucuOgeleri: SepetUrun[]) => void;
-  sepetiAyarla: (items: SepetUrun[]) => void;
+  sepetiAyarla: (items: SepetUrun[], yerelKayitKapat?: boolean) => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -40,6 +40,10 @@ export function sepetleriBirlestir(a: SepetUrun[], b: SepetUrun[]): SepetUrun[] 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<SepetUrun[]>([]);
   const [yuklendi, setYuklendi] = useState(false);
+  // Giriş yapılınca merge tamamlandıktan sonra localStorage'a yazmayı durdur.
+  // Giriş yapılmış kullanıcının sepeti DB'de yaşıyor; localStorage kopyası
+  // sadece misafir modu için gerekli.
+  const [yerelKayitAktif, setYerelKayitAktif] = useState(true);
 
   useEffect(() => {
     try {
@@ -58,9 +62,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!yuklendi) return;
+    if (!yuklendi || !yerelKayitAktif) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items, yuklendi]);
+  }, [items, yuklendi, yerelKayitAktif]);
 
   const sepeteEkle = useCallback((item: SepetUrun) => {
     setItems((mevcut) => {
@@ -103,7 +107,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const sepetiAyarla = useCallback((yeniItems: SepetUrun[]) => setItems(yeniItems), []);
+  const sepetiAyarla = useCallback((yeniItems: SepetUrun[], yerelKayitKapat = false) => {
+    if (yerelKayitKapat) {
+      setYerelKayitAktif(false);
+      localStorage.removeItem(STORAGE_KEY);
+    }
+    setItems(yeniItems);
+  }, []);
 
   const toplamAdet = useMemo(() => items.reduce((acc, o) => acc + o.adet, 0), [items]);
 
