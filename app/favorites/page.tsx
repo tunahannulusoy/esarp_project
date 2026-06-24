@@ -97,8 +97,8 @@ export default function FavoritesPage() {
                   <Heart className="h-4 w-4 fill-rose-600 text-rose-600" strokeWidth={1.5} />
                 </button>
                 <Link href={`/products/${urun.id}`}>
-                  <div className="relative aspect-square overflow-hidden rounded-lg bg-stone-100">
-                    {resim && <Image src={resim} alt={urun.ad} fill sizes="200px" className="object-cover" />}
+                  <div className="overflow-hidden rounded-lg bg-stone-100">
+                    {resim && <Image src={resim} alt={urun.ad} width={600} height={600} sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw" className="h-auto w-full" />}
                   </div>
                   <h3 className="mt-2 line-clamp-1 text-sm font-medium text-stone-900">{urun.ad}</h3>
                   <p className="mt-1 text-sm font-semibold text-stone-900">{fiyatFormatla(fiyat)}</p>
@@ -114,8 +114,8 @@ export default function FavoritesPage() {
             const resim = urun.resim_linkler[0]?.url;
             return (
               <div key={urun.id} className="flex items-center gap-4 rounded-xl border border-stone-200 p-3">
-                <Link href={`/products/${urun.id}`} className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-stone-100">
-                  {resim && <Image src={resim} alt={urun.ad} fill sizes="64px" className="object-cover" />}
+                <Link href={`/products/${urun.id}`} className="w-16 shrink-0 overflow-hidden rounded-lg bg-stone-100">
+                  {resim && <Image src={resim} alt={urun.ad} width={64} height={64} sizes="64px" className="h-auto w-full" />}
                 </Link>
                 <div className="flex-1">
                   <Link href={`/products/${urun.id}`} className="text-sm font-medium text-stone-900 hover:underline">
