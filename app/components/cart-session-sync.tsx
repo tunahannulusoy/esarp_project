@@ -9,7 +9,7 @@ export const SEPET_BIRLESTIRME_ANAHTARI = "esarp_sepet_birlestirildi";
 
 export default function CartSessionSync() {
   const { user } = useSession();
-  const { items, sepetiAyarla } = useCart();
+  const { items, sepetiAyarla, setSunucuYuklendi } = useCart();
   const itemsRef = useRef(items);
   itemsRef.current = items;
 
@@ -19,6 +19,7 @@ export default function CartSessionSync() {
   useEffect(() => {
     if (!user) {
       setKayitHazir(false);
+      setSunucuYuklendi(true); // misafir: localStorage zaten hazır
       return;
     }
 
@@ -28,7 +29,8 @@ export default function CartSessionSync() {
       // Sayfa yenilemesi: localStorage boş olabilir, DB'den yükle.
       (async () => {
         const sunucuSepet = await getServerCart();
-        sepetiAyarla(sunucuSepet, true); // localStorage'a yazma
+        sepetiAyarla(sunucuSepet, true);
+        setSunucuYuklendi(true);
         setKayitHazir(true);
       })();
     } else {
@@ -36,8 +38,9 @@ export default function CartSessionSync() {
       setKayitHazir(false);
       (async () => {
         const birlesik = await mergeServerCart(itemsRef.current);
-        sepetiAyarla(birlesik, true); // localStorage'a yazma
+        sepetiAyarla(birlesik, true);
         sessionStorage.setItem(SEPET_BIRLESTIRME_ANAHTARI, user.id);
+        setSunucuYuklendi(true);
         setKayitHazir(true);
       })();
     }

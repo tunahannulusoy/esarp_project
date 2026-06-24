@@ -12,7 +12,7 @@ import { useFavorites } from "@/app/lib/favorites-context";
 export default function ProductCard({ urun }: { urun: Urun }) {
   const { favoriMi, favoriEkleCikar } = useFavorites();
   const begenildi = favoriMi(urun.id);
-  const { sepeteEkle, sepettenCikar, sepetteMi } = useCart();
+  const { sepeteEkle, sepettenCikar, sepetteMi, sunucuYuklendi } = useCart();
   const sepette = sepetteMi(urun.id);
   const varsayilanRenk = urun.renkler[0]?.ad ?? "";
   const varsayilanBoyut = urun.boyutlar[0] ?? "";
@@ -94,9 +94,12 @@ export default function ProductCard({ urun }: { urun: Urun }) {
           <button
             type="button"
             onClick={handleSepetToggle}
+            disabled={!sunucuYuklendi}
             aria-label={sepette ? "Sepetten çıkar" : "Sepete ekle"}
             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition ${
-              sepette
+              !sunucuYuklendi
+                ? "border border-stone-200 text-stone-300"
+                : sepette
                 ? "bg-stone-900 text-white hover:bg-stone-700"
                 : "border border-stone-300 text-stone-700 hover:border-stone-900 hover:text-stone-900"
             }`}

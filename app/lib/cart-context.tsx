@@ -8,6 +8,8 @@ const STORAGE_KEY = "esarp_sepet";
 type CartContextValue = {
   items: SepetUrun[];
   yuklendi: boolean;
+  sunucuYuklendi: boolean;
+  setSunucuYuklendi: (v: boolean) => void;
   toplamAdet: number;
   sepeteEkle: (item: SepetUrun) => void;
   sepettenCikar: (urunId: string, renk: string, boyut: string) => void;
@@ -40,6 +42,7 @@ export function sepetleriBirlestir(a: SepetUrun[], b: SepetUrun[]): SepetUrun[] 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<SepetUrun[]>([]);
   const [yuklendi, setYuklendi] = useState(false);
+  const [sunucuYuklendi, setSunucuYuklendi] = useState(false);
   // Giriş yapılınca merge tamamlandıktan sonra localStorage'a yazmayı durdur.
   // Giriş yapılmış kullanıcının sepeti DB'de yaşıyor; localStorage kopyası
   // sadece misafir modu için gerekli.
@@ -121,6 +124,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     () => ({
       items,
       yuklendi,
+      sunucuYuklendi,
+      setSunucuYuklendi,
       toplamAdet,
       sepeteEkle,
       sepettenCikar,
@@ -133,6 +138,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [
       items,
       yuklendi,
+      sunucuYuklendi,
+      setSunucuYuklendi,
       toplamAdet,
       sepeteEkle,
       sepettenCikar,
