@@ -14,8 +14,8 @@ export default function Header() {
   const pathname = usePathname();
   const [menuAcik, setMenuAcik] = useState(false);
   const [profilMenuAcik, setProfilMenuAcik] = useState(false);
-  const { toplamAdet, sunucuYuklendi: sepetYuklendi } = useCart();
-  const { favoriUrunIdleri, yuklendi: favoriYuklendi } = useFavorites();
+  const { toplamAdet, sunucuYuklendi: sepetYuklendi, sepetiTemizle } = useCart();
+  const { favoriUrunIdleri, yuklendi: favoriYuklendi, favorileriTemizle } = useFavorites();
   const { girisYapilmis } = useSession();
   const temizleYerelOturum = useClearLocalSession();
 
@@ -24,6 +24,8 @@ export default function Header() {
   }
 
   const handleCikisYap = async () => {
+    sepetiTemizle();
+    favorileriTemizle();
     await istemciTarafindaCikisYap();
     temizleYerelOturum();
     await logout();
