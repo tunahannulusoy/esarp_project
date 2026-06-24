@@ -1,6 +1,28 @@
 import { describe, expect, it } from "vitest";
 import { aramaParametrelerindenFiltreleriCikar, urunleriFiltreleVeSirala } from "@/app/lib/filter-utils";
-import { indirimliFiyatHesapla, mockUrunler } from "@/app/lib/mock-data";
+import { indirimliFiyatHesapla } from "@/app/lib/utils";
+import type { Urun } from "@/app/types";
+
+const testUrunleri: Urun[] = [
+  {
+    id: "a1", ad: "Eşarp A", aciklama: "", fiyat: 100, indirim_orani: 0,
+    kategori_id: "k1", resim_linkler: [], boyutlar: ["90x90"], renkler: [{ ad: "Kırmızı", hex: "#ff0000" }],
+    stok: 10, puan: 4.5, satis_adedi: 50, aktif: true,
+    olusturulma_tarihi: "2024-01-01T00:00:00Z", guncelleme_tarihi: "2024-01-01T00:00:00Z",
+  },
+  {
+    id: "a2", ad: "Eşarp B", aciklama: "", fiyat: 200, indirim_orani: 10,
+    kategori_id: "k2", resim_linkler: [], boyutlar: ["70x70"], renkler: [{ ad: "Lacivert", hex: "#000080" }],
+    stok: 5, puan: 3.8, satis_adedi: 20, aktif: true,
+    olusturulma_tarihi: "2024-02-01T00:00:00Z", guncelleme_tarihi: "2024-02-01T00:00:00Z",
+  },
+  {
+    id: "a3", ad: "Eşarp C", aciklama: "", fiyat: 150, indirim_orani: 0,
+    kategori_id: "k1", resim_linkler: [], boyutlar: ["90x90"], renkler: [{ ad: "Kırmızı", hex: "#ff0000" }],
+    stok: 0, puan: 4.8, satis_adedi: 100, aktif: true,
+    olusturulma_tarihi: "2024-03-01T00:00:00Z", guncelleme_tarihi: "2024-03-01T00:00:00Z",
+  },
+];
 
 describe("aramaParametrelerindenFiltreleriCikar", () => {
   it("URL parametrelerini doğru filtre nesnesine dönüştürür", () => {
@@ -24,7 +46,7 @@ describe("aramaParametrelerindenFiltreleriCikar", () => {
 
 describe("urunleriFiltreleVeSirala", () => {
   it("fiyat_artan sıralamasında en ucuz ürünü başa getirir", () => {
-    const sonuc = urunleriFiltreleVeSirala(mockUrunler, {
+    const sonuc = urunleriFiltreleVeSirala(testUrunleri, {
       renkler: [],
       kategoriler: [],
       boyutlar: [],
@@ -36,24 +58,24 @@ describe("urunleriFiltreleVeSirala", () => {
       const simdiki = indirimliFiyatHesapla(sonuc[i].fiyat, sonuc[i].indirim_orani);
       expect(simdiki).toBeGreaterThanOrEqual(onceki);
     }
-    expect(sonuc.length).toBe(mockUrunler.length);
+    expect(sonuc.length).toBe(testUrunleri.length);
   });
 
   it("minPuan filtresi uygulandığında puanı düşük ürünleri eler", () => {
-    const sonuc = urunleriFiltreleVeSirala(mockUrunler, {
+    const sonuc = urunleriFiltreleVeSirala(testUrunleri, {
       renkler: [],
       kategoriler: [],
       boyutlar: [],
       siralama: "en_yeni",
-      minPuan: 4,
+      minPuan: 4.5,
     });
 
-    expect(sonuc.every((u) => u.puan >= 4)).toBe(true);
-    expect(sonuc.length).toBeLessThan(mockUrunler.length);
+    expect(sonuc.every((u) => u.puan >= 4.5)).toBe(true);
+    expect(sonuc.length).toBeLessThan(testUrunleri.length);
   });
 
   it("eşleşmeyen arama sorgusunda boş liste döner", () => {
-    const sonuc = urunleriFiltreleVeSirala(mockUrunler, {
+    const sonuc = urunleriFiltreleVeSirala(testUrunleri, {
       q: "olmayan-urun-xyz",
       renkler: [],
       kategoriler: [],

@@ -1,5 +1,5 @@
 import type { SiralamaSecenegi, Urun } from "@/app/types";
-import { indirimliFiyatHesapla } from "@/app/lib/mock-data";
+import { indirimliFiyatHesapla } from "@/app/lib/utils";
 
 export type UrunFiltreleri = {
   q?: string;

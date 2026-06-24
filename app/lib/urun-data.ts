@@ -1,18 +1,10 @@
 import { createClient } from "@/app/lib/supabase/server";
-import { mockKategoriler } from "@/app/lib/mock-data";
 import type { Kategori, Urun } from "@/app/types";
 
-const supabaseYapilandirilmisMi = Boolean(
-  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
 export async function kategorileriGetir(): Promise<Kategori[]> {
-  if (!supabaseYapilandirilmisMi) return mockKategoriler;
-
   const supabase = await createClient();
   const { data, error } = await supabase.from("kategoriler").select("*").eq("aktif", true).order("sira");
-
-  if (error || !data || data.length === 0) return mockKategoriler;
+  if (error || !data) return [];
   return data as Kategori[];
 }
 

@@ -6,9 +6,8 @@ import { useMemo, useState } from "react";
 import { Heart, LayoutGrid, List } from "lucide-react";
 import { useFavorites } from "@/app/lib/favorites-context";
 import { useCart } from "@/app/lib/cart-context";
-import { indirimliFiyatHesapla } from "@/app/lib/mock-data";
 import { useUrunler } from "@/app/lib/use-urunler";
-import { fiyatFormatla } from "@/app/lib/utils";
+import { fiyatFormatla, indirimliFiyatHesapla } from "@/app/lib/utils";
 
 export default function FavoritesPage() {
   const { favoriUrunIdleri, favorilerdenCikar } = useFavorites();

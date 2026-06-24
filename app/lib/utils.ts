@@ -17,3 +17,8 @@ export function siparisNoOlustur(): string {
 export function cn(...classes: Array<string | false | null | undefined>): string {
   return classes.filter(Boolean).join(" ");
 }
+
+export function indirimliFiyatHesapla(fiyat: number, indirimOrani: number): number {
+  if (!indirimOrani) return fiyat;
+  return Math.round(fiyat * (1 - indirimOrani / 100) * 100) / 100;
+}

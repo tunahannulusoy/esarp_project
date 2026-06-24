@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Check, Heart } from "lucide-react";
 import type { Urun } from "@/app/types";
 import { fiyatFormatla } from "@/app/lib/utils";
-import { indirimliFiyatHesapla } from "@/app/lib/mock-data";
+import { indirimliFiyatHesapla } from "@/app/lib/utils";
 import { useCart } from "@/app/lib/cart-context";
 import { useFavorites } from "@/app/lib/favorites-context";
 

@@ -17,7 +17,10 @@ test("ürünü sepete ekleyip sepet sayfasında görme", async ({ page }) => {
 });
 
 test("ürün detay sayfası renk ve boyut seçimini gösterir", async ({ page }) => {
-  await page.goto("/products/urun-1");
+  await page.goto("/");
+  const ilkUrunLinki = page.locator("a[href^='/products/']").first();
+  const href = await ilkUrunLinki.getAttribute("href");
+  await page.goto(href!);
   await expect(page.getByRole("heading", { name: "Renk" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Boyut" })).toBeVisible();
 });

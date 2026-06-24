@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/app/lib/cart-context";
 import { fiyatFormatla } from "@/app/lib/utils";
-import { indirimliFiyatHesapla } from "@/app/lib/mock-data";
+import { indirimliFiyatHesapla } from "@/app/lib/utils";
 import { useUrunler } from "@/app/lib/use-urunler";
 import { useSession } from "@/app/lib/use-session";
 import SignInModal from "@/app/components/sign-in-modal";
