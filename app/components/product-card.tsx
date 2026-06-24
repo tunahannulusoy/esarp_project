@@ -50,14 +50,15 @@ export default function ProductCard({ urun }: { urun: Urun }) {
       </button>
 
       <Link href={`/products/${urun.id}`} className="block">
-        <div className="relative aspect-square overflow-hidden bg-stone-100">
+        <div className="overflow-hidden bg-white">
           {anaResim && (
             <Image
               src={anaResim}
               alt={urun.ad}
-              fill
+              width={600}
+              height={600}
               sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-              className="object-cover transition group-hover:scale-105"
+              className="h-auto w-full transition group-hover:scale-105"
             />
           )}
           {indirimVar && (

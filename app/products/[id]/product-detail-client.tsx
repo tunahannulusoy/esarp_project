@@ -48,7 +48,7 @@ export default function ProductDetailClient({ urun }: { urun: Urun }) {
                 aktifResim === resim.url ? "border-stone-900" : "border-transparent"
               }`}
             >
-              <Image src={resim.url} alt={`${urun.ad} ${resim.sira}`} fill sizes="100px" className="object-cover" />
+              <Image src={resim.url} alt={`${urun.ad} ${resim.sira}`} fill sizes="100px" className="object-contain" />
             </button>
           ))}
         </div>
