@@ -14,12 +14,10 @@ export default function Header() {
   const pathname = usePathname();
   const [menuAcik, setMenuAcik] = useState(false);
   const [profilMenuAcik, setProfilMenuAcik] = useState(false);
-  const { toplamAdet } = useCart();
-  const { favoriUrunIdleri } = useFavorites();
+  const { toplamAdet, yuklendi: sepetYuklendi } = useCart();
+  const { favoriUrunIdleri, yuklendi: favoriYuklendi } = useFavorites();
   const { girisYapilmis } = useSession();
   const temizleYerelOturum = useClearLocalSession();
-  const sepetSayisi = toplamAdet;
-  const favoriSayisi = favoriUrunIdleri.length;
 
   if (pathname?.startsWith("/admin")) {
     return null;
@@ -51,12 +49,20 @@ export default function Header() {
         <nav className="ml-auto flex items-center gap-4 text-sm">
           <Link href="/profile/favorites" className="hidden items-center gap-1 sm:flex" aria-label="Beğendiklerim">
             <Heart className="h-5 w-5" strokeWidth={1.5} />
-            <span>{favoriSayisi}</span>
+            {favoriYuklendi ? (
+              <span>{favoriUrunIdleri.length}</span>
+            ) : (
+              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-stone-300 border-t-stone-600" />
+            )}
           </Link>
 
           <Link href="/cart" className="flex items-center gap-1" aria-label="Sepet">
             <ShoppingCart className="h-5 w-5" strokeWidth={1.5} />
-            <span>{sepetSayisi}</span>
+            {sepetYuklendi ? (
+              <span>{toplamAdet}</span>
+            ) : (
+              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-stone-300 border-t-stone-600" />
+            )}
           </Link>
 
           {girisYapilmis ? (

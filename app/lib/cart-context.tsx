@@ -7,6 +7,7 @@ const STORAGE_KEY = "esarp_sepet";
 
 type CartContextValue = {
   items: SepetUrun[];
+  yuklendi: boolean;
   toplamAdet: number;
   sepeteEkle: (item: SepetUrun) => void;
   sepettenCikar: (urunId: string, renk: string, boyut: string) => void;
@@ -109,6 +110,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(
     () => ({
       items,
+      yuklendi,
       toplamAdet,
       sepeteEkle,
       sepettenCikar,
@@ -120,6 +122,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }),
     [
       items,
+      yuklendi,
       toplamAdet,
       sepeteEkle,
       sepettenCikar,

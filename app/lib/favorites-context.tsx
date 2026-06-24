@@ -8,6 +8,7 @@ const STORAGE_KEY = "esarp_favoriler";
 
 type FavoritesContextValue = {
   favoriUrunIdleri: string[];
+  yuklendi: boolean;
   favoriMi: (urunId: string) => boolean;
   favoriEkleCikar: (urunId: string) => void;
   favorilerdenCikar: (urunId: string) => void;
@@ -71,13 +72,14 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(
     () => ({
       favoriUrunIdleri,
+      yuklendi,
       favoriMi,
       favoriEkleCikar,
       favorilerdenCikar,
       favorileriTemizle,
       favoriDisaridanBirlestir,
     }),
-    [favoriUrunIdleri, favoriMi, favoriEkleCikar, favorilerdenCikar, favorileriTemizle, favoriDisaridanBirlestir]
+    [favoriUrunIdleri, yuklendi, favoriMi, favoriEkleCikar, favorilerdenCikar, favorileriTemizle, favoriDisaridanBirlestir]
   );
 
   return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;
