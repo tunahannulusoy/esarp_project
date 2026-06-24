@@ -21,7 +21,7 @@ export async function resimYenidenBoyutlandir(
   const boyut = RESIM_BOYUTLARI[boyutTipi];
 
   return sharp(buffer)
-    .resize(boyut, boyut, { fit: "cover", position: "center" })
+    .resize(boyut, boyut, { fit: "inside", withoutEnlargement: true })
     .jpeg({ quality: JPEG_KALITESI })
     .toBuffer();
 }

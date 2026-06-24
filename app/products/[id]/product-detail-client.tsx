@@ -44,11 +44,11 @@ export default function ProductDetailClient({ urun }: { urun: Urun }) {
               key={resim.sira}
               type="button"
               onClick={() => setAktifResim(resim.url)}
-              className={`relative aspect-square overflow-hidden rounded-lg border-2 ${
+              className={`overflow-hidden rounded-lg border-2 ${
                 aktifResim === resim.url ? "border-stone-900" : "border-transparent"
               }`}
             >
-              <Image src={resim.url} alt={`${urun.ad} ${resim.sira}`} fill sizes="100px" className="object-contain" />
+              <Image src={resim.url} alt={`${urun.ad} ${resim.sira}`} width={200} height={200} sizes="100px" className="h-auto w-full" />
             </button>
           ))}
         </div>
