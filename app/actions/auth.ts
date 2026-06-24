@@ -269,6 +269,21 @@ export async function deleteAccount(): Promise<AuthFormState> {
   redirect("/");
 }
 
+export async function bildirimTercihiGuncelle(acik: boolean): Promise<void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  await supabase.from("users").update({ bildirim_tercihi: acik }).eq("id", user.id);
+}
+
+export async function bildirimTercihiGetir(): Promise<boolean> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return true;
+  const { data } = await supabase.from("users").select("bildirim_tercihi").eq("id", user.id).single();
+  return data?.bildirim_tercihi ?? true;
+}
+
 export async function logout() {
   if (supabaseYapilandirilmisMi()) {
     const supabase = await createClient();

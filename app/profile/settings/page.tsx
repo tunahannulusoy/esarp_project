@@ -2,12 +2,11 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { LogOut } from "lucide-react";
-import { deleteAccount, logout, updateEmail, updatePassword, type AuthFormState } from "@/app/actions/auth";
+import { deleteAccount, logout, updateEmail, updatePassword, bildirimTercihiGetir, bildirimTercihiGuncelle, type AuthFormState } from "@/app/actions/auth";
 import { istemciTarafindaCikisYap } from "@/app/lib/use-session";
 import { useClearLocalSession } from "@/app/lib/use-clear-local-session";
 
 const baslangicState: AuthFormState = { success: false };
-const BILDIRIM_STORAGE_KEY = "esarp_bildirim_tercihleri";
 
 export default function SettingsPage() {
   const [emailState, emailAction, emailPending] = useActionState(updateEmail, baslangicState);
@@ -25,13 +24,12 @@ export default function SettingsPage() {
   const [silHata, setSilHata] = useState<string | null>(null);
 
   useEffect(() => {
-    const ham = localStorage.getItem(BILDIRIM_STORAGE_KEY);
-    if (ham !== null) setBildirimAcik(ham === "true");
+    bildirimTercihiGetir().then(setBildirimAcik);
   }, []);
 
   const bildirimDegistir = (deger: boolean) => {
     setBildirimAcik(deger);
-    localStorage.setItem(BILDIRIM_STORAGE_KEY, String(deger));
+    bildirimTercihiGuncelle(deger);
   };
 
   const handleHesabiSil = async () => {
