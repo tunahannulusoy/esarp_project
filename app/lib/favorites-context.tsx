@@ -1,10 +1,8 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { useSession } from "@/app/lib/use-session";
 import { addServerFavorite, removeServerFavorite } from "@/app/actions/favorites";
-
-const STORAGE_KEY = "esarp_favoriler";
 
 type FavoritesContextValue = {
   favoriUrunIdleri: string[];
@@ -13,7 +11,8 @@ type FavoritesContextValue = {
   favoriEkleCikar: (urunId: string) => void;
   favorilerdenCikar: (urunId: string) => void;
   favorileriTemizle: () => void;
-  favoriDisaridanBirlestir: (sunucuUrunIdleri: string[]) => void;
+  setFavoriler: (idler: string[]) => void;
+  setYuklendi: (v: boolean) => void;
 };
 
 const FavoritesContext = createContext<FavoritesContextValue | null>(null);
@@ -22,22 +21,6 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const [favoriUrunIdleri, setFavoriUrunIdleri] = useState<string[]>([]);
   const [yuklendi, setYuklendi] = useState(false);
   const { girisYapilmis } = useSession();
-
-  useEffect(() => {
-    try {
-      const ham = localStorage.getItem(STORAGE_KEY);
-      if (ham) setFavoriUrunIdleri(JSON.parse(ham));
-    } catch {
-      // localStorage erişilemezse boş listeyle devam et
-    } finally {
-      setYuklendi(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!yuklendi) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(favoriUrunIdleri));
-  }, [favoriUrunIdleri, yuklendi]);
 
   const favoriMi = useCallback((urunId: string) => favoriUrunIdleri.includes(urunId), [favoriUrunIdleri]);
 
@@ -65,9 +48,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 
   const favorileriTemizle = useCallback(() => setFavoriUrunIdleri([]), []);
 
-  const favoriDisaridanBirlestir = useCallback((sunucuUrunIdleri: string[]) => {
-    setFavoriUrunIdleri((mevcut) => Array.from(new Set([...mevcut, ...sunucuUrunIdleri])));
-  }, []);
+  const setFavoriler = useCallback((idler: string[]) => setFavoriUrunIdleri(idler), []);
 
   const value = useMemo(
     () => ({
@@ -77,9 +58,10 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       favoriEkleCikar,
       favorilerdenCikar,
       favorileriTemizle,
-      favoriDisaridanBirlestir,
+      setFavoriler,
+      setYuklendi,
     }),
-    [favoriUrunIdleri, yuklendi, favoriMi, favoriEkleCikar, favorilerdenCikar, favorileriTemizle, favoriDisaridanBirlestir]
+    [favoriUrunIdleri, yuklendi, favoriMi, favoriEkleCikar, favorilerdenCikar, favorileriTemizle, setFavoriler]
   );
 
   return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;

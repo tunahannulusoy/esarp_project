@@ -1,40 +1,76 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "@/app/lib/use-session";
 import { useFavorites } from "@/app/lib/favorites-context";
 import { getServerFavorites, syncFavorites } from "@/app/actions/favorites";
 
+const STORAGE_KEY = "esarp_favoriler";
+const BIRLESTIRME_ANAHTARI = "esarp_favoriler_birlestirildi";
+
+function yerelFavorileriOku(): string[] {
+  try {
+    const ham = localStorage.getItem(STORAGE_KEY);
+    return ham ? (JSON.parse(ham) as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 export default function FavoritesSessionSync() {
   const { user } = useSession();
-  const { favoriUrunIdleri, favoriDisaridanBirlestir } = useFavorites();
-  const favorilerRef = useRef(favoriUrunIdleri);
-  favorilerRef.current = favoriUrunIdleri;
+  const { favoriUrunIdleri, setFavoriler, setYuklendi } = useFavorites();
 
-  // Sepetin aksine burada "zaten birleştirdim mi" kilidi yok: bu birleştirme
-  // tamamen idempotent (Set tabanlı birleşim + ignoreDuplicates upsert),
-  // yani birden çok kez çalışması veriyi bozmaz. Bir kilit kullanmak (önceki
-  // sürümde olduğu gibi) tam tersi bir riski doğuruyordu — giriş sonrası ilk
-  // deneme cookie'lerin tam oturmadığı bir anda boş sonuç dönerse, kilit yine
-  // de kalıcı olarak "tamamlandı" sayılıp gerçek favoriler bir daha hiç
-  // çekilmiyordu (sayfa yenilenene kadar). user değiştikçe yeniden denenmesi
-  // güvenli ve gerekli.
+  const [mod, setMod] = useState<"yerel" | "sunucu" | null>(null);
+  const [kayitHazir, setKayitHazir] = useState(false);
+  const prevUserId = useRef<string | null | undefined>(undefined);
+
   useEffect(() => {
-    if (!user) return;
+    const userId = user?.id ?? null;
+    if (userId === prevUserId.current) return;
+    prevUserId.current = userId;
+
+    setKayitHazir(false);
+    setYuklendi(false);
+
+    if (!user) {
+      // Misafir: localStorage'dan yükle
+      setFavoriler(yerelFavorileriOku());
+      setMod("yerel");
+      setYuklendi(true);
+      setKayitHazir(true);
+      return;
+    }
+
+    const zatenBirlesti = sessionStorage.getItem(BIRLESTIRME_ANAHTARI) === user.id;
 
     (async () => {
       const sunucuFavorileri = await getServerFavorites();
-      const yereldeOlupSunucudaOlmayanlar = favorilerRef.current.filter((id) => !sunucuFavorileri.includes(id));
 
-      if (sunucuFavorileri.length > 0) {
-        favoriDisaridanBirlestir(sunucuFavorileri);
+      if (!zatenBirlesti) {
+        // İlk giriş: misafir favorilerini DB ile birleştir
+        const yerel = yerelFavorileriOku();
+        const sadeceYerelde = yerel.filter((id) => !sunucuFavorileri.includes(id));
+        if (sadeceYerelde.length > 0) await syncFavorites(sadeceYerelde);
+        localStorage.removeItem(STORAGE_KEY);
+        sessionStorage.setItem(BIRLESTIRME_ANAHTARI, user.id);
+        setFavoriler(Array.from(new Set([...sunucuFavorileri, ...yerel])));
+      } else {
+        // Sayfa yenilemesi: DB'den yükle
+        setFavoriler(sunucuFavorileri);
       }
-      if (yereldeOlupSunucudaOlmayanlar.length > 0) {
-        await syncFavorites(yereldeOlupSunucudaOlmayanlar);
-      }
-      localStorage.removeItem("esarp_favoriler");
+
+      setMod("sunucu");
+      setYuklendi(true);
+      setKayitHazir(true);
     })();
-  }, [user, favoriDisaridanBirlestir]);
+  }, [user, setFavoriler, setYuklendi]);
+
+  // Misafir: favori listesi değişince localStorage'a yaz
+  useEffect(() => {
+    if (!kayitHazir || mod !== "yerel") return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(favoriUrunIdleri));
+  }, [favoriUrunIdleri, kayitHazir, mod]);
 
   return null;
 }

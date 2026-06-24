@@ -1,23 +1,19 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import type { SepetUrun } from "@/app/types";
-
-const STORAGE_KEY = "esarp_sepet";
 
 type CartContextValue = {
   items: SepetUrun[];
-  yuklendi: boolean;
   sunucuYuklendi: boolean;
-  setSunucuYuklendi: (v: boolean) => void;
   toplamAdet: number;
   sepeteEkle: (item: SepetUrun) => void;
   sepettenCikar: (urunId: string, renk: string, boyut: string) => void;
   adetGuncelle: (urunId: string, renk: string, boyut: string, adet: number) => void;
   sepetiTemizle: () => void;
   sepetteMi: (urunId: string) => boolean;
-  sepetiDisaridanBirlestir: (sunucuOgeleri: SepetUrun[]) => void;
-  sepetiAyarla: (items: SepetUrun[], yerelKayitKapat?: boolean) => void;
+  setItems: (items: SepetUrun[]) => void;
+  setSunucuYuklendi: (v: boolean) => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -41,33 +37,7 @@ export function sepetleriBirlestir(a: SepetUrun[], b: SepetUrun[]): SepetUrun[] 
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<SepetUrun[]>([]);
-  const [yuklendi, setYuklendi] = useState(false);
   const [sunucuYuklendi, setSunucuYuklendi] = useState(false);
-  // Giriş yapılınca merge tamamlandıktan sonra localStorage'a yazmayı durdur.
-  // Giriş yapılmış kullanıcının sepeti DB'de yaşıyor; localStorage kopyası
-  // sadece misafir modu için gerekli.
-  const [yerelKayitAktif, setYerelKayitAktif] = useState(true);
-
-  useEffect(() => {
-    try {
-      const ham = localStorage.getItem(STORAGE_KEY);
-      if (ham) {
-        const parsed: SepetUrun[] = JSON.parse(ham);
-        // Eski mock ID'leri (urun-1, urun-2 ...) içeren bozuk veriyi temizle
-        const gecerli = parsed.filter((o) => /^[0-9a-f-]{36}$/i.test(o.urun_id));
-        setItems(gecerli);
-      }
-    } catch {
-      // localStorage erişilemezse sessizce boş sepetle devam et
-    } finally {
-      setYuklendi(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!yuklendi || !yerelKayitAktif) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items, yuklendi, yerelKayitAktif]);
 
   const sepeteEkle = useCallback((item: SepetUrun) => {
     setItems((mevcut) => {
@@ -93,62 +63,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const sepetteMi = useCallback((urunId: string) => items.some((o) => o.urun_id === urunId), [items]);
 
-  const sepetiDisaridanBirlestir = useCallback((sunucuOgeleri: SepetUrun[]) => {
-    setItems((mevcut) => {
-      const birlesik = [...mevcut];
-      sunucuOgeleri.forEach((sunucuOge) => {
-        const index = birlesik.findIndex((o) =>
-          ayniOge(o, sunucuOge.urun_id, sunucuOge.secili_renk, sunucuOge.secili_boyut)
-        );
-        if (index === -1) {
-          birlesik.push(sunucuOge);
-        } else {
-          birlesik[index] = { ...birlesik[index], adet: birlesik[index].adet + sunucuOge.adet };
-        }
-      });
-      return birlesik;
-    });
-  }, []);
-
-  const sepetiAyarla = useCallback((yeniItems: SepetUrun[], yerelKayitKapat = false) => {
-    if (yerelKayitKapat) {
-      setYerelKayitAktif(false);
-      localStorage.removeItem(STORAGE_KEY);
-    }
-    setItems(yeniItems);
-  }, []);
-
   const toplamAdet = useMemo(() => items.reduce((acc, o) => acc + o.adet, 0), [items]);
 
   const value = useMemo(
     () => ({
       items,
-      yuklendi,
       sunucuYuklendi,
-      setSunucuYuklendi,
       toplamAdet,
       sepeteEkle,
       sepettenCikar,
       adetGuncelle,
       sepetiTemizle,
       sepetteMi,
-      sepetiDisaridanBirlestir,
-      sepetiAyarla,
+      setItems,
+      setSunucuYuklendi,
     }),
-    [
-      items,
-      yuklendi,
-      sunucuYuklendi,
-      setSunucuYuklendi,
-      toplamAdet,
-      sepeteEkle,
-      sepettenCikar,
-      adetGuncelle,
-      sepetiTemizle,
-      sepetteMi,
-      sepetiDisaridanBirlestir,
-      sepetiAyarla,
-    ]
+    [items, sunucuYuklendi, toplamAdet, sepeteEkle, sepettenCikar, adetGuncelle, sepetiTemizle, sepetteMi]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
