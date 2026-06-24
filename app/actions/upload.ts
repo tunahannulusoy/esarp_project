@@ -40,8 +40,9 @@ export async function urunResmiYukle(
   }
 
   const supabase = await createClient();
-  const anaYol = `${urunId}/${urunId}_resim_${sira}.jpg`;
-  const thumbYol = `${urunId}/${urunId}_resim_${sira}_thumb.jpg`;
+  const ts = Date.now();
+  const anaYol = `${urunId}/${urunId}_resim_${sira}_${ts}.jpg`;
+  const thumbYol = `${urunId}/${urunId}_resim_${sira}_${ts}_thumb.jpg`;
 
   const [anaSonuc, thumbSonuc] = await Promise.all([
     supabase.storage.from(BUCKET).upload(anaYol, buyuk, { contentType: "image/jpeg", upsert: true }),
