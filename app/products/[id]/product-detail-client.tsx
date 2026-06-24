@@ -13,6 +13,7 @@ export default function ProductDetailClient({ urun }: { urun: Urun }) {
   const resimler = [...urun.resim_linkler].sort((a, b) => a.sira - b.sira);
   const [aktifResim, setAktifResim] = useState(resimler[0]?.url);
   const [secilenRenk, setSecilenRenk] = useState(urun.renkler[0]?.ad ?? "");
+  const [secilenBoyut, setSecilenBoyut] = useState(urun.boyutlar[0] ?? "");
   const [adet, setAdet] = useState(1);
   const [eklendi, setEklendi] = useState(false);
 
@@ -24,7 +25,7 @@ export default function ProductDetailClient({ urun }: { urun: Urun }) {
   const stokYok = urun.stok === 0;
 
   const handleSepeteEkle = () => {
-    sepeteEkle({ urun_id: urun.id, adet, secili_renk: secilenRenk, secili_boyut: urun.boyutlar[0] ?? "" });
+    sepeteEkle({ urun_id: urun.id, adet, secili_renk: secilenRenk, secili_boyut: secilenBoyut });
     setEklendi(true);
     setTimeout(() => setEklendi(false), 1500);
   };
@@ -103,6 +104,27 @@ export default function ProductDetailClient({ urun }: { urun: Urun }) {
                 }`}
                 style={{ backgroundColor: renk.hex }}
               />
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <h3 className="text-sm font-medium text-stone-900">Boyut</h3>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {urun.boyutlar.map((boyut) => (
+              <button
+                key={boyut}
+                type="button"
+                onClick={() => setSecilenBoyut(boyut)}
+                aria-pressed={secilenBoyut === boyut}
+                className={`rounded-lg border px-3 py-1.5 text-sm ${
+                  secilenBoyut === boyut
+                    ? "border-stone-900 bg-stone-900 text-white"
+                    : "border-stone-300 text-stone-700"
+                }`}
+              >
+                {boyut}
+              </button>
             ))}
           </div>
         </div>
