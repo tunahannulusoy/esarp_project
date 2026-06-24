@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getAdminProducts } from "@/app/actions/products";
 import { getAllOrdersAdmin } from "@/app/actions/orders";
-import type { Siparis } from "@/app/types";
+import type { Siparis, Urun } from "@/app/types";
 import { fiyatFormatla } from "@/app/lib/utils";
 import AdminSpinner from "@/app/admin/components/admin-spinner";
 
@@ -15,7 +15,7 @@ export default function AdminDashboardPage() {
   const [yukleniyor, setYukleniyor] = useState(true);
 
   useEffect(() => {
-    Promise.all([getAdminProducts(), getAllOrdersAdmin()]).then(([urunler, siparisler]: [any[], Siparis[]]) => {
+    Promise.all([getAdminProducts(), getAllOrdersAdmin()]).then(([urunler, siparisler]: [Urun[], Siparis[]]) => {
       setUrunSayisi(urunler.length);
       setSiparisSayisi(siparisler.length);
       setToplamGelir(siparisler.reduce((acc, s) => acc + s.toplam_tutar, 0));
