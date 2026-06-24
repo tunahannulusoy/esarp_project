@@ -33,7 +33,17 @@ export default function FavoritesPage() {
   };
 
   if (favoriUrunler.length === 0) {
-    return <p className="text-sm text-stone-600">Henüz favori ürününüz yok.</p>;
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6 lg:px-8">
+        <p className="text-lg text-stone-600">Henüz favori ürününüz yok.</p>
+        <Link
+          href="/"
+          className="mt-4 inline-block rounded-lg bg-stone-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-stone-700"
+        >
+          Ürünleri Keşfet
+        </Link>
+      </div>
+    );
   }
 
   return (
