@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { Kategori } from "@/app/types";
 import { createCategory, deleteCategory, getAdminCategories } from "@/app/actions/categories";
 import AdminSpinner from "@/app/admin/components/admin-spinner";
+import ConfirmModal from "@/app/admin/components/confirm-modal";
 
 export default function AdminCategoriesPage() {
   const [kategoriler, setKategoriler] = useState<Kategori[]>([]);
@@ -11,6 +12,7 @@ export default function AdminCategoriesPage() {
   const [ad, setAd] = useState("");
   const [aciklama, setAciklama] = useState("");
   const [hata, setHata] = useState<string | null>(null);
+  const [silinecekId, setSilinecekId] = useState<string | null>(null);
 
   useEffect(() => {
     getAdminCategories().then((data) => { setKategoriler(data); setYukleniyor(false); });
@@ -32,9 +34,10 @@ export default function AdminCategoriesPage() {
     setAciklama("");
   };
 
-  const handleSil = async (id: string) => {
-    if (!confirm("Bu kategoriyi silmek istediğinize emin misiniz?")) return;
-    await deleteCategory(id);
+  const handleSil = async () => {
+    if (!silinecekId) return;
+    await deleteCategory(silinecekId);
+    setSilinecekId(null);
     getAdminCategories().then(setKategoriler);
   };
 
@@ -42,6 +45,15 @@ export default function AdminCategoriesPage() {
 
   return (
     <div>
+      <ConfirmModal
+        acik={!!silinecekId}
+        baslik="Kategoriyi sil"
+        mesaj="Bu kategoriyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
+        onayMetni="Evet, sil"
+        tehlikeli
+        onOnayla={handleSil}
+        onIptal={() => setSilinecekId(null)}
+      />
       <h1 className="text-2xl font-semibold text-stone-900">Kategoriler</h1>
 
       {hata && <p className="mt-4 max-w-xl rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{hata}</p>}
@@ -85,7 +97,7 @@ export default function AdminCategoriesPage() {
                 <td className="px-4 py-3 font-medium text-stone-900">{kategori.ad}</td>
                 <td className="px-4 py-3 text-stone-600">{kategori.aciklama}</td>
                 <td className="whitespace-nowrap px-4 py-3 text-right">
-                  <button type="button" onClick={() => handleSil(kategori.id)} className="font-medium text-rose-600 hover:underline">
+                  <button type="button" onClick={() => setSilinecekId(kategori.id)} className="font-medium text-rose-600 hover:underline">
                     Sil
                   </button>
                 </td>

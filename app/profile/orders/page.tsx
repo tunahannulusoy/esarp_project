@@ -7,6 +7,7 @@ import { getUserOrders } from "@/app/actions/orders";
 import { fiyatFormatla } from "@/app/lib/utils";
 import { useCart } from "@/app/lib/cart-context";
 import { useUrunler } from "@/app/lib/use-urunler";
+import { useRouter } from "next/navigation";
 
 const DURUM_RENGI: Record<Siparis["durum"], string> = {
   "Ödeme Bekleme": "bg-amber-100 text-amber-700",
@@ -21,6 +22,7 @@ export default function OrdersPage() {
   const [yukleniyor, setYukleniyor] = useState(true);
   const { sepeteEkle } = useCart();
   const { urunGetir } = useUrunler();
+  const router = useRouter();
 
   useEffect(() => {
     getUserOrders().then((veri) => {
@@ -39,6 +41,7 @@ export default function OrdersPage() {
         secili_boyut: urunSatiri.secili_boyut,
       });
     });
+    router.push("/cart");
   };
 
   if (yukleniyor) return null;

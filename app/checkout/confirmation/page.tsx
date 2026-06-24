@@ -8,18 +8,22 @@ import type { Siparis } from "@/app/types";
 import { whatsappLinkiOlustur } from "@/app/lib/orders";
 import { getOrderById } from "@/app/actions/orders";
 import { fiyatFormatla } from "@/app/lib/utils";
+import { useCart } from "@/app/lib/cart-context";
 
 function OnaySayfasiIcerik() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
   const [siparis, setSiparis] = useState<Siparis | null | undefined>(undefined);
+  const { sepetiTemizle } = useCart();
 
   useEffect(() => {
+    sepetiTemizle();
     if (!id) {
       setSiparis(null);
       return;
     }
     getOrderById(id).then((veri) => setSiparis(veri));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   if (siparis === undefined) return null;

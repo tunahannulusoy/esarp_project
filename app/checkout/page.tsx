@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/app/lib/cart-context";
 import { useAddresses } from "@/app/lib/address-context";
@@ -16,12 +16,15 @@ import { useProfile } from "@/app/lib/profile-context";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, sepetiTemizle } = useCart();
+  const { items } = useCart();
   const { adresler, adresEkle } = useAddresses();
   const { girisYapilmis, yukleniyor } = useSession();
   const { profil, profilGuncelle } = useProfile();
   const { urunGetir } = useUrunler();
 
+  const [siparisTamamlandi, setSiparisTamamlandi] = useState(false);
+  const [ilerleme, setIlerleme] = useState(0);
+  const ilerlemeRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [seciliAdresId, setSeciliAdresId] = useState<string | null>(
     adresler.find((a) => a.varsayilan)?.id ?? adresler[0]?.id ?? null
   );
@@ -69,6 +72,20 @@ export default function CheckoutPage() {
     setAdHata(null);
 
     setGonderiliyor(true);
+    setIlerleme(0);
+
+    const animasyonPromise = new Promise<void>((resolve) => {
+      let sayac = 0;
+      ilerlemeRef.current = setInterval(() => {
+        sayac += 1;
+        setIlerleme(sayac);
+        if (sayac >= 100) {
+          clearInterval(ilerlemeRef.current!);
+          resolve();
+        }
+      }, 30);
+    });
+
     const musteriAdiSoyadi = `${ad.trim()} ${soyad.trim()}`;
     await profilGuncelle({ ...profil, ad: ad.trim(), soyad: soyad.trim() });
 
@@ -80,15 +97,20 @@ export default function CheckoutPage() {
       secili_boyut: oge.secili_boyut,
     }));
 
-    const sonuc = await createOrder(siparisUrunleri, seciliAdres.id, musteriAdiSoyadi);
+    const [sonuc] = await Promise.all([
+      createOrder(siparisUrunleri, seciliAdres.id, musteriAdiSoyadi),
+      animasyonPromise,
+    ]);
 
     if (!sonuc.success || !sonuc.siparis) {
-      setAdHata(sonuc.message ?? "Sipariş oluşturulamadı, lütfen tekrar deneyin.");
+      if (ilerlemeRef.current) clearInterval(ilerlemeRef.current);
+      setIlerleme(0);
       setGonderiliyor(false);
+      setAdHata(sonuc.message ?? "Sipariş oluşturulamadı, lütfen tekrar deneyin.");
       return;
     }
 
-    sepetiTemizle();
+    setSiparisTamamlandi(true);
 
     const adresMetni = `${seciliAdres.acik_adres}, ${seciliAdres.mahalle}, ${seciliAdres.ilce}/${seciliAdres.il}`;
     siparisOlusturulduBildirimGonder(sonuc.siparis, adresMetni);
@@ -96,7 +118,7 @@ export default function CheckoutPage() {
     router.push(`/checkout/confirmation?id=${sonuc.siparis.id}`);
   };
 
-  if (sepetOgeleri.length === 0) {
+  if (sepetOgeleri.length === 0 && !siparisTamamlandi && !gonderiliyor) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6 lg:px-8">
         <p className="text-lg text-stone-600">Sepetiniz boş, sipariş oluşturamazsınız.</p>
@@ -115,6 +137,42 @@ export default function CheckoutPage() {
       <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6 lg:px-8">
         <p className="text-lg text-stone-600">Sipariş oluşturmak için giriş yapmalısınız.</p>
         <AuthModal acik onKapat={() => router.push("/cart")} hedefYol="/checkout" />
+      </div>
+    );
+  }
+
+  if (gonderiliyor || siparisTamamlandi) {
+    const yuzde = Math.min(Math.round(ilerleme), 100);
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white px-6">
+        {/* Halka */}
+        <div className="relative flex items-center justify-center">
+          <svg className="h-32 w-32 sm:h-40 sm:w-40 -rotate-90" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#e7e5e4" strokeWidth="8" />
+            <circle
+              cx="60" cy="60" r="50"
+              fill="none"
+              stroke="url(#grad)"
+              strokeWidth="8"
+              strokeLinecap="round"
+              strokeDasharray={`${2 * Math.PI * 50}`}
+              strokeDashoffset={`${2 * Math.PI * 50 * (1 - yuzde / 100)}`}
+              style={{ transition: "stroke-dashoffset 0.05s linear" }}
+            />
+            <defs>
+              <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#059669" />
+                <stop offset="100%" stopColor="#10b981" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <span className="absolute text-2xl font-bold text-stone-900 sm:text-3xl">%{yuzde}</span>
+        </div>
+
+        <p className="mt-6 text-sm font-medium text-stone-600 sm:text-base">
+          Siparişiniz oluşturuluyor...
+        </p>
+
       </div>
     );
   }

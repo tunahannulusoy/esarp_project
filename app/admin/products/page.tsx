@@ -7,18 +7,21 @@ import type { Urun } from "@/app/types";
 import { deleteProduct, getAdminProducts } from "@/app/actions/products";
 import { fiyatFormatla } from "@/app/lib/utils";
 import AdminSpinner from "@/app/admin/components/admin-spinner";
+import ConfirmModal from "@/app/admin/components/confirm-modal";
 
 export default function AdminProductsPage() {
   const [urunler, setUrunler] = useState<Urun[]>([]);
   const [yukleniyor, setYukleniyor] = useState(true);
+  const [silinecekId, setSilinecekId] = useState<string | null>(null);
 
   useEffect(() => {
     getAdminProducts().then((data) => { setUrunler(data); setYukleniyor(false); });
   }, []);
 
-  const handleSil = async (id: string) => {
-    if (!confirm("Bu ürünü silmek istediğinize emin misiniz?")) return;
-    await deleteProduct(id);
+  const handleSil = async () => {
+    if (!silinecekId) return;
+    await deleteProduct(silinecekId);
+    setSilinecekId(null);
     getAdminProducts().then(setUrunler);
   };
 
@@ -26,6 +29,15 @@ export default function AdminProductsPage() {
 
   return (
     <div>
+      <ConfirmModal
+        acik={!!silinecekId}
+        baslik="Ürünü sil"
+        mesaj="Bu ürünü silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
+        onayMetni="Evet, sil"
+        tehlikeli
+        onOnayla={handleSil}
+        onIptal={() => setSilinecekId(null)}
+      />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-stone-900">Ürünler</h1>
         <Link
@@ -66,7 +78,7 @@ export default function AdminProductsPage() {
               <Link href={`/admin/products/${urun.id}`} className="font-medium text-blue-600 hover:underline">
                 Düzenle
               </Link>
-              <button type="button" onClick={() => handleSil(urun.id)} className="font-medium text-rose-600 hover:underline">
+              <button type="button" onClick={() => setSilinecekId(urun.id)} className="font-medium text-rose-600 hover:underline">
                 Sil
               </button>
             </div>
@@ -109,7 +121,7 @@ export default function AdminProductsPage() {
                   <Link href={`/admin/products/${urun.id}`} className="mr-3 font-medium text-blue-600 hover:underline">
                     Düzenle
                   </Link>
-                  <button type="button" onClick={() => handleSil(urun.id)} className="font-medium text-rose-600 hover:underline">
+                  <button type="button" onClick={() => setSilinecekId(urun.id)} className="font-medium text-rose-600 hover:underline">
                     Sil
                   </button>
                 </td>

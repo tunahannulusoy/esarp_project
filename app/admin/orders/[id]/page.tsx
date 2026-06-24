@@ -5,6 +5,7 @@ import type { Siparis } from "@/app/types";
 import { getOrderById, siparisDurumBildirimGonder, updateOrderStatus } from "@/app/actions/orders";
 import { useUrunler } from "@/app/lib/use-urunler";
 import { fiyatFormatla } from "@/app/lib/utils";
+import ConfirmModal from "@/app/admin/components/confirm-modal";
 
 const DURUMLAR: Siparis["durum"][] = [
   "Ödeme Bekleme",
@@ -17,18 +18,26 @@ const DURUMLAR: Siparis["durum"][] = [
 export default function AdminOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [siparis, setSiparis] = useState<Siparis | null | undefined>(undefined);
+  const [bekleyenDurum, setBekleyenDurum] = useState<Siparis["durum"] | null>(null);
   const { urunGetir } = useUrunler();
 
   useEffect(() => {
     getOrderById(id).then((veri) => setSiparis(veri));
   }, [id]);
 
-  const handleDurumDegistir = async (durum: Siparis["durum"]) => {
-    const sonuc = await updateOrderStatus(id, durum);
+  const handleDurumDegistir = (durum: Siparis["durum"]) => {
+    if (durum === siparis?.durum) return;
+    setBekleyenDurum(durum);
+  };
+
+  const handleOnay = async () => {
+    if (!bekleyenDurum) return;
+    const sonuc = await updateOrderStatus(id, bekleyenDurum);
     if (sonuc.success && sonuc.siparis) {
       setSiparis(sonuc.siparis);
-      siparisDurumBildirimGonder(sonuc.siparis.musteri_email, sonuc.siparis.siparis_no, durum);
+      siparisDurumBildirimGonder(sonuc.siparis.musteri_email, sonuc.siparis.siparis_no, bekleyenDurum);
     }
+    setBekleyenDurum(null);
   };
 
   if (siparis === undefined) return null;
@@ -36,6 +45,15 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="max-w-2xl">
+      <ConfirmModal
+        acik={!!bekleyenDurum}
+        baslik="Sipariş durumunu değiştir"
+        mesaj={`"${siparis?.durum}" → "${bekleyenDurum}" olarak değiştirmek istediğinize emin misiniz?`}
+        onayMetni="Evet, değiştir"
+        tehlikeli={bekleyenDurum === "İptal Edildi"}
+        onOnayla={handleOnay}
+        onIptal={() => setBekleyenDurum(null)}
+      />
       <h1 className="text-2xl font-semibold text-stone-900">Sipariş #{siparis.siparis_no}</h1>
       <p className="mt-1 text-sm text-stone-600">
         {siparis.musteri_adi}
