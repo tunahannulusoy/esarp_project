@@ -154,7 +154,7 @@ export default function ProductForm({ baslangicDeger, onKaydet }: ProductFormPro
             >
               {onizlemeler[index] ? (
                 // eslint-disable-next-line @next/next/no-img-element -- blob: önizleme URL'leri next/image remotePatterns ile uyumlu değil
-                <img src={onizlemeler[index]!} alt={`Görsel ${index + 1}`} className="h-full w-full object-cover" />
+                <img src={onizlemeler[index]!} alt={`Görsel ${index + 1}`} className="h-full w-full object-contain" />
               ) : (
                 <span>Görsel {index + 1}</span>
               )}
