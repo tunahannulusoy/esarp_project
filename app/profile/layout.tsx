@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "@/app/lib/use-session";
-import SignInModal from "@/app/components/sign-in-modal";
+import AuthModal from "@/app/components/auth-modal";
 
 const SEKMELER = [
   { href: "/profile", etiket: "Profilim" },
@@ -22,7 +22,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
     return (
       <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6 lg:px-8">
         <p className="text-lg text-stone-600">Profilinizi görüntülemek için giriş yapmalısınız.</p>
-        <SignInModal acik onKapat={() => router.push("/")} hedefYol={pathname} />
+        <AuthModal acik onKapat={() => router.push("/")} hedefYol={pathname} />
       </div>
     );
   }

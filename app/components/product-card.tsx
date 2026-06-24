@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, ShoppingCart, Star } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 import type { Urun } from "@/app/types";
 import { fiyatFormatla } from "@/app/lib/utils";
 import { indirimliFiyatHesapla } from "@/app/lib/utils";
@@ -71,10 +71,6 @@ export default function ProductCard({ urun }: { urun: Urun }) {
         <div className="px-3 pt-3">
           <h3 className="line-clamp-1 text-sm font-medium text-stone-900">{urun.ad}</h3>
 
-          <div className="mt-0.5 flex items-center gap-1 text-xs text-stone-500">
-            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" strokeWidth={1.5} />
-            {urun.puan.toFixed(1)}
-          </div>
         </div>
       </Link>
 

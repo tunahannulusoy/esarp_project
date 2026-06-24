@@ -7,7 +7,6 @@ import { ChevronDown } from "lucide-react";
 const SECENEKLER: { deger: string; etiket: string }[] = [
   { deger: "en_yeni", etiket: "En Yeni Ürünler" },
   { deger: "en_cok_satan", etiket: "En Çok Satanlar" },
-  { deger: "en_yuksek_puan", etiket: "En Yüksek Puan" },
   { deger: "fiyat_artan", etiket: "Fiyat: Düşükten Yükseğe" },
   { deger: "fiyat_azalan", etiket: "Fiyat: Yüksekten Düşüğe" },
 ];

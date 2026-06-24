@@ -5,7 +5,6 @@ export type UrunFiltreleri = {
   q?: string;
   minFiyat?: number;
   maxFiyat?: number;
-  minPuan?: number;
   renkler: string[];
   kategoriler: string[];
   boyutlar: string[];
@@ -23,7 +22,6 @@ export function aramaParametrelerindenFiltreleriCikar(
     q: tekDeger(params.q),
     minFiyat: params.minFiyat ? Number(tekDeger(params.minFiyat)) : undefined,
     maxFiyat: params.maxFiyat ? Number(tekDeger(params.maxFiyat)) : undefined,
-    minPuan: params.puan ? Number(tekDeger(params.puan)) : undefined,
     renkler: listeDegeri(params.renk),
     kategoriler: listeDegeri(params.kategori),
     boyutlar: listeDegeri(params.boyut),
@@ -41,7 +39,6 @@ export function urunleriFiltreleVeSirala(urunler: Urun[], filtreler: UrunFiltrel
     if (filtreler.renkler.length > 0 && !urun.renkler.some((r) => filtreler.renkler.includes(r.ad))) return false;
     if (filtreler.kategoriler.length > 0 && !filtreler.kategoriler.includes(urun.kategori_id)) return false;
     if (filtreler.boyutlar.length > 0 && !urun.boyutlar.some((b) => filtreler.boyutlar.includes(b))) return false;
-    if (filtreler.minPuan !== undefined && urun.puan < filtreler.minPuan) return false;
 
     return true;
   });
@@ -59,8 +56,6 @@ export function urunleriFiltreleVeSirala(urunler: Urun[], filtreler: UrunFiltrel
         return new Date(b.olusturulma_tarihi).getTime() - new Date(a.olusturulma_tarihi).getTime();
       case "en_cok_satan":
         return b.satis_adedi - a.satis_adedi;
-      case "en_yuksek_puan":
-        return b.puan - a.puan;
       default:
         return 0;
     }

@@ -9,7 +9,7 @@ import { fiyatFormatla } from "@/app/lib/utils";
 import { indirimliFiyatHesapla } from "@/app/lib/utils";
 import { useUrunler } from "@/app/lib/use-urunler";
 import { useSession } from "@/app/lib/use-session";
-import SignInModal from "@/app/components/sign-in-modal";
+import AuthModal from "@/app/components/auth-modal";
 
 const KARGO_UCRETI = 49.9;
 const UCRETSIZ_KARGO_ESIGI = 500;
@@ -166,7 +166,7 @@ export default function CartPage() {
         </div>
       </div>
 
-      <SignInModal acik={modalAcik} onKapat={() => setModalAcik(false)} hedefYol="/checkout" />
+      <AuthModal acik={modalAcik} onKapat={() => setModalAcik(false)} hedefYol="/checkout" />
     </div>
   );
 }

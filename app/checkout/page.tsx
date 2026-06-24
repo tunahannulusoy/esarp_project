@@ -11,7 +11,7 @@ import { kargoUcretiHesapla, tahminiTeslimatGunSayisiHesapla } from "@/app/lib/t
 import { createOrder, siparisOlusturulduBildirimGonder } from "@/app/actions/orders";
 import AddressForm from "@/app/components/address-form";
 import { useSession } from "@/app/lib/use-session";
-import SignInModal from "@/app/components/sign-in-modal";
+import AuthModal from "@/app/components/auth-modal";
 import { useProfile } from "@/app/lib/profile-context";
 
 export default function CheckoutPage() {
@@ -114,7 +114,7 @@ export default function CheckoutPage() {
     return (
       <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6 lg:px-8">
         <p className="text-lg text-stone-600">Sipariş oluşturmak için giriş yapmalısınız.</p>
-        <SignInModal acik onKapat={() => router.push("/cart")} hedefYol="/checkout" />
+        <AuthModal acik onKapat={() => router.push("/cart")} hedefYol="/checkout" />
       </div>
     );
   }

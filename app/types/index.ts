@@ -122,8 +122,7 @@ export type SiralamaSecenegi =
   | "fiyat_artan"
   | "fiyat_azalan"
   | "en_cok_satan"
-  | "en_yeni"
-  | "en_yuksek_puan";
+  | "en_yeni";
 
 export type FiltreSecenekleri = {
   minFiyat?: number;

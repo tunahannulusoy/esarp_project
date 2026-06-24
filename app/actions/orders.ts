@@ -76,13 +76,13 @@ export async function createOrder(
     return { success: false, message: error.message };
   }
 
-  // Sipariş oluşturulunca stokları düşür
+  // Sipariş oluşturulunca stok düşür, satış adedi artır
   for (const oge of sepetOgeleri) {
-    const { data: urun } = await supabase.from("urunler").select("stok").eq("id", oge.urun_id).single();
+    const { data: urun } = await supabase.from("urunler").select("stok, satis_adedi").eq("id", oge.urun_id).single();
     if (urun) {
       await supabase
         .from("urunler")
-        .update({ stok: urun.stok - oge.adet })
+        .update({ stok: urun.stok - oge.adet, satis_adedi: urun.satis_adedi + oge.adet })
         .eq("id", oge.urun_id);
     }
   }
@@ -147,11 +147,11 @@ export async function updateOrderStatus(id: string, durum: SiparisDurum): Promis
 
     if (mevcutSiparis && mevcutSiparis.durum !== "İptal Edildi") {
       for (const oge of mevcutSiparis.urunler as SiparisUrun[]) {
-        const { data: urun } = await supabase.from("urunler").select("stok").eq("id", oge.urun_id).single();
+        const { data: urun } = await supabase.from("urunler").select("stok, satis_adedi").eq("id", oge.urun_id).single();
         if (urun) {
           await supabase
             .from("urunler")
-            .update({ stok: urun.stok + oge.adet })
+            .update({ stok: urun.stok + oge.adet, satis_adedi: Math.max(0, urun.satis_adedi - oge.adet) })
             .eq("id", oge.urun_id);
         }
       }

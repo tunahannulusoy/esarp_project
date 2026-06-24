@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Check, ChevronDown, ChevronUp, Package, Palette, Ruler, SlidersHorizontal, Star } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Package, Palette, Ruler, SlidersHorizontal } from "lucide-react";
 import type { Kategori } from "@/app/types";
 
 type FilterPanelProps = {
@@ -21,7 +21,6 @@ export default function FilterPanel({ kategoriler, renkler, boyutlar }: FilterPa
   const seciliBoyutlar = searchParams.get("boyut")?.split(",").filter(Boolean) ?? [];
   const minFiyat = searchParams.get("minFiyat") ?? "";
   const maxFiyat = searchParams.get("maxFiyat") ?? "";
-  const minPuan = searchParams.get("puan") ?? "";
 
   const [minFiyatTaslak, setMinFiyatTaslak] = useState(minFiyat);
   const [maxFiyatTaslak, setMaxFiyatTaslak] = useState(maxFiyat);
@@ -72,7 +71,7 @@ export default function FilterPanel({ kategoriler, renkler, boyutlar }: FilterPa
     seciliBoyutlar.length +
     (minFiyat ? 1 : 0) +
     (maxFiyat ? 1 : 0) +
-    (minPuan ? 1 : 0);
+    0;
 
   return (
     <div>
@@ -188,35 +187,6 @@ export default function FilterPanel({ kategoriler, renkler, boyutlar }: FilterPa
               >
                 {boyut}
               </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-900">
-            <Star className="h-4 w-4" strokeWidth={1.5} />
-            Puan
-          </h3>
-          <div className="mt-2 space-y-1.5">
-            {[4, 3, 2].map((puan) => (
-              <label key={puan} className="flex items-center gap-2 text-sm text-stone-700">
-                <input
-                  type="checkbox"
-                  checked={minPuan === String(puan)}
-                  onChange={() => parametreyiGuncelle("puan", minPuan === String(puan) ? null : String(puan))}
-                  className="rounded border-stone-300"
-                />
-                <span className="flex items-center gap-0.5">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-3.5 w-3.5 ${i < puan ? "fill-amber-400 text-amber-400" : "text-stone-300"}`}
-                      strokeWidth={1.5}
-                    />
-                  ))}
-                </span>
-                ve üzeri
-              </label>
             ))}
           </div>
         </div>

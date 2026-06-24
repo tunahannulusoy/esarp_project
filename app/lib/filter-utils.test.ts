@@ -61,18 +61,6 @@ describe("urunleriFiltreleVeSirala", () => {
     expect(sonuc.length).toBe(testUrunleri.length);
   });
 
-  it("minPuan filtresi uygulandığında puanı düşük ürünleri eler", () => {
-    const sonuc = urunleriFiltreleVeSirala(testUrunleri, {
-      renkler: [],
-      kategoriler: [],
-      boyutlar: [],
-      siralama: "en_yeni",
-      minPuan: 4.5,
-    });
-
-    expect(sonuc.every((u) => u.puan >= 4.5)).toBe(true);
-    expect(sonuc.length).toBeLessThan(testUrunleri.length);
-  });
 
   it("eşleşmeyen arama sorgusunda boş liste döner", () => {
     const sonuc = urunleriFiltreleVeSirala(testUrunleri, {

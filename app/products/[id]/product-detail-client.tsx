@@ -117,11 +117,7 @@ export default function ProductDetailClient({ urun }: { urun: Urun }) {
                 type="button"
                 onClick={() => setSecilenBoyut(boyut)}
                 aria-pressed={secilenBoyut === boyut}
-                className={`rounded-lg border px-3 py-1.5 text-sm ${
-                  secilenBoyut === boyut
-                    ? "border-stone-900 bg-stone-900 text-white"
-                    : "border-stone-300 text-stone-700"
-                }`}
+                className="rounded-lg border border-stone-300 px-3 py-1.5 text-sm text-stone-700"
               >
                 {boyut}
               </button>

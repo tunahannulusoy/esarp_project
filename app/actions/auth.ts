@@ -18,6 +18,34 @@ export type AuthFormState = {
 const SUPABASE_BAGLANTI_YOK_MESAJI =
   "Supabase bağlantısı henüz yapılandırılmadı. .env.local dosyasına Supabase bilgilerinizi ekleyin.";
 
+const SUPABASE_HATA_CEVIRISI: Record<string, string> = {
+  "User already registered": "Bu email adresi zaten kayıtlı.",
+  "Invalid login credentials": "Email veya şifre hatalı.",
+  "Email not confirmed": "Email adresiniz henüz doğrulanmamış.",
+  "Password should be at least 6 characters": "Şifre en az 6 karakter olmalı.",
+  "Password should contain at least one character of each: abcdefghijklmnopqrstuvwxyz, ABCDEFGHIJKLMNOPQRSTUVWXYZ, 0123456789.":
+    "Şifre büyük/küçük harf ve rakam içermeli.",
+  "Signup requires a valid password": "Geçerli bir şifre giriniz.",
+  "Unable to validate email address: invalid format": "Geçersiz email formatı.",
+  "Email rate limit exceeded": "Çok fazla deneme yapıldı. Lütfen bekleyin.",
+  "over_email_send_rate_limit": "E-posta gönderme sınırı aşıldı. Lütfen bekleyin.",
+  "For security purposes, you can only request this once every 60 seconds":
+    "Güvenlik nedeniyle bu işlemi 60 saniyede bir yapabilirsiniz.",
+  "User not found": "Kullanıcı bulunamadı.",
+  "Token has expired or is invalid": "Bağlantı süresi dolmuş veya geçersiz.",
+  "New password should be different from the old password": "Yeni şifre eski şifreden farklı olmalı.",
+  "Auth session missing": "Oturum bulunamadı. Lütfen tekrar giriş yapın.",
+  "Session from session_id claim in JWT does not exist": "Oturumunuzun süresi dolmuş. Lütfen tekrar giriş yapın.",
+};
+
+function turkceHata(mesaj: string): string {
+  if (SUPABASE_HATA_CEVIRISI[mesaj]) return SUPABASE_HATA_CEVIRISI[mesaj];
+  for (const [en, tr] of Object.entries(SUPABASE_HATA_CEVIRISI)) {
+    if (mesaj.toLowerCase().includes(en.toLowerCase())) return tr;
+  }
+  return mesaj;
+}
+
 const COK_FAZLA_DENEME_MESAJI = (saniye: number) =>
   `Çok fazla deneme yaptınız. Lütfen ${saniye} saniye sonra tekrar deneyin.`;
 
@@ -47,7 +75,7 @@ export async function signUp(_prevState: AuthFormState, formData: FormData): Pro
   });
 
   if (error) {
-    return { success: false, message: error.message };
+    return { success: false, message: turkceHata(error.message) };
   }
 
   // Email sahipliği kayıt formundan önce, app'in kendi 6 haneli kod akışıyla
@@ -166,7 +194,7 @@ export async function resetPassword(_prevState: AuthFormState, formData: FormDat
   });
 
   if (error) {
-    return { success: false, message: error.message };
+    return { success: false, message: turkceHata(error.message) };
   }
 
   return { success: true, message: "Şifre sıfırlama linki email adresinize gönderildi." };
@@ -190,7 +218,7 @@ export async function updateEmail(_prevState: AuthFormState, formData: FormData)
   );
 
   if (error) {
-    return { success: false, message: error.message };
+    return { success: false, message: turkceHata(error.message) };
   }
 
   await auditLogEkle("email_guncellendi", { yeniEmail: email });
@@ -222,7 +250,7 @@ export async function updatePassword(_prevState: AuthFormState, formData: FormDa
   const { error } = await supabase.auth.updateUser({ password: parsed.data });
 
   if (error) {
-    return { success: false, message: error.message };
+    return { success: false, message: turkceHata(error.message) };
   }
 
   await auditLogEkle("sifre_guncellendi");
@@ -261,7 +289,7 @@ export async function deleteAccount(): Promise<AuthFormState> {
   const { error } = await adminSupabase.auth.admin.deleteUser(user.id);
 
   if (error) {
-    return { success: false, message: error.message };
+    return { success: false, message: turkceHata(error.message) };
   }
 
   await auditLogEkle("hesap_silindi", { email: user.email });
