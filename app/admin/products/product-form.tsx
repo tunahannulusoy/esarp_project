@@ -9,6 +9,7 @@ import { urunResmiYukle } from "@/app/actions/upload";
 
 type ProductFormProps = {
   baslangicDeger?: Urun;
+  kategoriler?: Kategori[];
   onKaydet: (veri: {
     id: string;
     ad: string;
@@ -27,9 +28,9 @@ const BOYUT_SECENEKLERI = ["90x90", "70x70"];
 const SUPABASE_YAPILANDIRILMIS =
   typeof process !== "undefined" && Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
 
-export default function ProductForm({ baslangicDeger, onKaydet }: ProductFormProps) {
+export default function ProductForm({ baslangicDeger, kategoriler: verilenKategoriler, onKaydet }: ProductFormProps) {
   const router = useRouter();
-  const [kategoriler, setKategoriler] = useState<Kategori[]>([]);
+  const [kategoriler, setKategoriler] = useState<Kategori[]>(verilenKategoriler ?? []);
   const [hata, setHata] = useState<string | null>(null);
   const [kaydediliyor, setKaydediliyor] = useState(false);
   const [kategoriId, setKategoriId] = useState(baslangicDeger?.kategori_id ?? "");
@@ -42,8 +43,9 @@ export default function ProductForm({ baslangicDeger, onKaydet }: ProductFormPro
   );
 
   useEffect(() => {
+    if (verilenKategoriler) return;
     getAdminCategories().then(setKategoriler);
-  }, []);
+  }, [verilenKategoriler]);
 
   const boyutToggle = (boyut: string) => {
     setSecilenBoyutlar((mevcut) =>
@@ -252,16 +254,23 @@ export default function ProductForm({ baslangicDeger, onKaydet }: ProductFormPro
           id="kategori_id"
           name="kategori_id"
           required
-          value={kategoriId}
+          disabled={kategoriler.length === 0}
+          value={kategoriler.length === 0 ? "" : kategoriId}
           onChange={(e) => setKategoriId(e.target.value)}
-          className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm disabled:bg-stone-50 disabled:text-stone-500"
         >
-          <option value="">Seçin</option>
-          {kategoriler.map((kategori) => (
-            <option key={kategori.id} value={kategori.id}>
-              {kategori.ad}
-            </option>
-          ))}
+          {kategoriler.length === 0 ? (
+            <option value="">Yükleniyor...</option>
+          ) : (
+            <>
+              <option value="">Seçin</option>
+              {kategoriler.map((kategori) => (
+                <option key={kategori.id} value={kategori.id}>
+                  {kategori.ad}
+                </option>
+              ))}
+            </>
+          )}
         </select>
       </div>
 
