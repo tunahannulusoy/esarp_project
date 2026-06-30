@@ -82,7 +82,6 @@ export async function getAddresses(): Promise<Adres[]> {
     .from("adresler")
     .select("*")
     .eq("kullanici_id", user.id)
-    .eq("silinmis", false)
     .order("olusturulma_tarihi", { ascending: true });
 
   return (data as Adres[]) ?? [];
@@ -123,8 +122,7 @@ export async function addAddress(formData: FormData): Promise<AddressActionState
   const { count } = await supabase
     .from("adresler")
     .select("id", { count: "exact", head: true })
-    .eq("kullanici_id", user.id)
-    .eq("silinmis", false);
+    .eq("kullanici_id", user.id);
 
   const varsayilanYapilsin = formData.get("varsayilan") === "on" || !count;
 
@@ -192,7 +190,7 @@ export async function deleteAddress(addressId: string): Promise<UserActionState>
   const supabase = await createClient();
   const { error } = await supabase
     .from("adresler")
-    .update({ silinmis: true })
+    .delete()
     .eq("id", addressId)
     .eq("kullanici_id", user.id);
 

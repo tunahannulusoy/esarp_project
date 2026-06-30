@@ -35,7 +35,7 @@ export async function getAdminCategories(): Promise<Kategori[]> {
   return (data as Kategori[]) ?? [];
 }
 
-export async function createCategory(ad: string, aciklama: string): Promise<CategoryActionState> {
+export async function createCategory(ad: string): Promise<CategoryActionState> {
   if (!supabaseYapilandirilmisMi()) {
     return { success: false, message: SUPABASE_BAGLANTI_YOK_MESAJI };
   }
@@ -52,7 +52,7 @@ export async function createCategory(ad: string, aciklama: string): Promise<Cate
 
   const { data, error } = await supabase
     .from("kategoriler")
-    .insert({ ad: ad.trim(), aciklama, sira: (count ?? 0) + 1, aktif: true })
+    .insert({ ad: ad.trim(), sira: (count ?? 0) + 1 })
     .select()
     .single();
 

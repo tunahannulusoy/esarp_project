@@ -69,9 +69,6 @@ export default function AdminProductsPage() {
                 <span>{fiyatFormatla(urun.fiyat)}</span>
                 <span>·</span>
                 <span>Stok: {urun.stok}</span>
-                <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${urun.aktif ? "bg-emerald-100 text-emerald-700" : "bg-stone-100 text-stone-500"}`}>
-                  {urun.aktif ? "Aktif" : "Pasif"}
-                </span>
               </div>
             </div>
             <div className="flex shrink-0 flex-col items-end gap-1 text-sm">
@@ -95,7 +92,6 @@ export default function AdminProductsPage() {
               <th className="px-4 py-3">Ad</th>
               <th className="px-4 py-3">Fiyat</th>
               <th className="px-4 py-3">Stok</th>
-              <th className="px-4 py-3">Durum</th>
               <th className="px-4 py-3"></th>
             </tr>
           </thead>
@@ -112,11 +108,6 @@ export default function AdminProductsPage() {
                 <td className="px-4 py-3 font-medium text-stone-900">{urun.ad}</td>
                 <td className="px-4 py-3">{fiyatFormatla(urun.fiyat)}</td>
                 <td className="px-4 py-3">{urun.stok}</td>
-                <td className="px-4 py-3">
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${urun.aktif ? "bg-emerald-100 text-emerald-700" : "bg-stone-100 text-stone-500"}`}>
-                    {urun.aktif ? "Aktif" : "Pasif"}
-                  </span>
-                </td>
                 <td className="px-4 py-3 text-right">
                   <Link href={`/admin/products/${urun.id}`} className="mr-3 font-medium text-blue-600 hover:underline">
                     Düzenle

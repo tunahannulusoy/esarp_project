@@ -3,7 +3,7 @@ import type { Kategori, Urun } from "@/app/types";
 
 export async function kategorileriGetir(): Promise<Kategori[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("kategoriler").select("*").eq("aktif", true).order("sira");
+  const { data, error } = await supabase.from("kategoriler").select("*").order("sira");
   if (error || !data) return [];
   return data as Kategori[];
 }

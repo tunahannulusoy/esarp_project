@@ -23,16 +23,12 @@ export type Urun = {
   satis_adedi: number;
   olusturulma_tarihi: string;
   guncelleme_tarihi: string;
-  aktif: boolean;
 };
 
 export type Kategori = {
   id: string;
   ad: string;
-  aciklama: string;
-  resim_linki: string;
   sira: number;
-  aktif: boolean;
 };
 
 export type Kullanici = {
@@ -45,7 +41,6 @@ export type Kullanici = {
   email_dogrulanmis: boolean;
   kayit_tarihi: string;
   son_giris_tarihi: string;
-  aktif: boolean;
 };
 
 export type Adres = {
@@ -58,7 +53,6 @@ export type Adres = {
   adres_basligi: string;
   telefon: string;
   varsayilan: boolean;
-  silinmis: boolean;
   olusturulma_tarihi: string;
 };
 
@@ -91,12 +85,9 @@ export type Siparis = {
   toplam_tutar: number;
   durum: SiparisDurum;
   odeme_metodu: "Banka Transferi/Havale" | "Kapıda Ödeme";
-  odeme_durumu: "Beklemede" | "Ödendi" | "İptal";
   olusturulma_tarihi: string;
-  odeme_tarihi: string | null;
   tahmini_teslimat_tarihi: string | null;
   guncelleme_tarihi: string;
-  whatsapp_mesaj_gonderildi: boolean;
   tracking_no: string | null;
 };
 

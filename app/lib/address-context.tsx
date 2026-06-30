@@ -11,7 +11,7 @@ import {
   setDefaultAddress as setDefaultAddressAction,
 } from "@/app/actions/users";
 
-type YeniAdres = Omit<Adres, "id" | "kullanici_id" | "silinmis" | "olusturulma_tarihi">;
+type YeniAdres = Omit<Adres, "id" | "kullanici_id" | "olusturulma_tarihi">;
 
 type AddressContextValue = {
   adresler: Adres[];

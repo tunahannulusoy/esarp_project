@@ -5,7 +5,7 @@ import { IL_LISTESI, ilceleriGetir } from "@/app/lib/turkiye-iller";
 import { addressSchema } from "@/app/lib/validation";
 import type { Adres } from "@/app/types";
 
-type AdresFormVerisi = Omit<Adres, "id" | "kullanici_id" | "silinmis" | "olusturulma_tarihi">;
+type AdresFormVerisi = Omit<Adres, "id" | "kullanici_id" | "olusturulma_tarihi">;
 
 export default function AddressForm({
   baslangicDeger,

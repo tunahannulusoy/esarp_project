@@ -7,19 +7,19 @@ const testUrunleri: Urun[] = [
   {
     id: "a1", ad: "Eşarp A", aciklama: "", fiyat: 100, indirim_orani: 0,
     kategori_id: "k1", resim_linkler: [], boyutlar: ["90x90"], renkler: [{ ad: "Kırmızı", hex: "#ff0000" }],
-    stok: 10, puan: 4.5, satis_adedi: 50, aktif: true,
+    stok: 10, puan: 4.5, satis_adedi: 50,
     olusturulma_tarihi: "2024-01-01T00:00:00Z", guncelleme_tarihi: "2024-01-01T00:00:00Z",
   },
   {
     id: "a2", ad: "Eşarp B", aciklama: "", fiyat: 200, indirim_orani: 10,
     kategori_id: "k2", resim_linkler: [], boyutlar: ["70x70"], renkler: [{ ad: "Lacivert", hex: "#000080" }],
-    stok: 5, puan: 3.8, satis_adedi: 20, aktif: true,
+    stok: 5, puan: 3.8, satis_adedi: 20,
     olusturulma_tarihi: "2024-02-01T00:00:00Z", guncelleme_tarihi: "2024-02-01T00:00:00Z",
   },
   {
     id: "a3", ad: "Eşarp C", aciklama: "", fiyat: 150, indirim_orani: 0,
     kategori_id: "k1", resim_linkler: [], boyutlar: ["90x90"], renkler: [{ ad: "Kırmızı", hex: "#ff0000" }],
-    stok: 0, puan: 4.8, satis_adedi: 100, aktif: true,
+    stok: 0, puan: 4.8, satis_adedi: 100,
     olusturulma_tarihi: "2024-03-01T00:00:00Z", guncelleme_tarihi: "2024-03-01T00:00:00Z",
   },
 ];

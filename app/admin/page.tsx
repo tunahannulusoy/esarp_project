@@ -51,7 +51,7 @@ export default function AdminDashboardPage() {
   const aktifSiparisler = siparisler.filter((s) => s.durum !== "İptal Edildi");
   const toplamGelir = aktifSiparisler.reduce((acc, s) => acc + s.toplam_tutar, 0);
   const tahsilEdilen = siparisler
-    .filter((s) => s.odeme_durumu === "Ödendi")
+    .filter((s) => s.durum !== "Ödeme Bekleme" && s.durum !== "İptal Edildi")
     .reduce((acc, s) => acc + s.toplam_tutar, 0);
   const bekleyenOdeme = siparisler.filter((s) => s.durum === "Ödeme Bekleme").length;
   const iptalEdilen = siparisler.filter((s) => s.durum === "İptal Edildi").length;

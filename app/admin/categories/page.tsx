@@ -10,7 +10,6 @@ export default function AdminCategoriesPage() {
   const [kategoriler, setKategoriler] = useState<Kategori[]>([]);
   const [yukleniyor, setYukleniyor] = useState(true);
   const [ad, setAd] = useState("");
-  const [aciklama, setAciklama] = useState("");
   const [hata, setHata] = useState<string | null>(null);
   const [silinecekId, setSilinecekId] = useState<string | null>(null);
 
@@ -23,7 +22,7 @@ export default function AdminCategoriesPage() {
     setHata(null);
     if (!ad.trim()) return;
 
-    const sonuc = await createCategory(ad, aciklama);
+    const sonuc = await createCategory(ad);
     if (!sonuc.success) {
       setHata(sonuc.message ?? "Kategori eklenemedi");
       return;
@@ -31,7 +30,6 @@ export default function AdminCategoriesPage() {
 
     getAdminCategories().then(setKategoriler);
     setAd("");
-    setAciklama("");
   };
 
   const handleSil = async () => {
@@ -58,20 +56,13 @@ export default function AdminCategoriesPage() {
 
       {hata && <p className="mt-4 max-w-xl rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{hata}</p>}
 
-      <form onSubmit={handleEkle} className="mt-6 flex max-w-xl flex-col gap-3 rounded-xl bg-white p-4 shadow-sm sm:flex-row">
+      <form onSubmit={handleEkle} className="mt-6 flex max-w-xl gap-3 rounded-xl bg-white p-4 shadow-sm">
         <input
           type="text"
           placeholder="Kategori adı"
           value={ad}
           onChange={(e) => setAd(e.target.value)}
           required
-          className="flex-1 rounded-lg border border-stone-300 px-3 py-2 text-sm"
-        />
-        <input
-          type="text"
-          placeholder="Açıklama"
-          value={aciklama}
-          onChange={(e) => setAciklama(e.target.value)}
           className="flex-1 rounded-lg border border-stone-300 px-3 py-2 text-sm"
         />
         <button
@@ -87,7 +78,6 @@ export default function AdminCategoriesPage() {
           <thead className="bg-stone-50 text-left text-stone-500">
             <tr>
               <th className="px-4 py-3">Ad</th>
-              <th className="px-4 py-3">Açıklama</th>
               <th className="px-4 py-3"></th>
             </tr>
           </thead>
@@ -95,7 +85,6 @@ export default function AdminCategoriesPage() {
             {kategoriler.map((kategori) => (
               <tr key={kategori.id} className="border-t border-stone-100">
                 <td className="px-4 py-3 font-medium text-stone-900">{kategori.ad}</td>
-                <td className="px-4 py-3 text-stone-600">{kategori.aciklama}</td>
                 <td className="whitespace-nowrap px-4 py-3 text-right">
                   <button type="button" onClick={() => setSilinecekId(kategori.id)} className="font-medium text-rose-600 hover:underline">
                     Sil

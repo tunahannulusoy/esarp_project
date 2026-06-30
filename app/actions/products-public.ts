@@ -8,7 +8,6 @@ export async function getPublicProducts(): Promise<Urun[]> {
   const { data, error } = await supabase
     .from("urunler")
     .select("*")
-    .eq("aktif", true)
     .order("olusturulma_tarihi", { ascending: false });
 
   if (error || !data) return [];
