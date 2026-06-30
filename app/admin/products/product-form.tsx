@@ -32,6 +32,7 @@ export default function ProductForm({ baslangicDeger, onKaydet }: ProductFormPro
   const [kategoriler, setKategoriler] = useState<Kategori[]>([]);
   const [hata, setHata] = useState<string | null>(null);
   const [kaydediliyor, setKaydediliyor] = useState(false);
+  const [kategoriId, setKategoriId] = useState(baslangicDeger?.kategori_id ?? "");
   const [secilenBoyutlar, setSecilenBoyutlar] = useState<string[]>(baslangicDeger?.boyutlar ?? []);
   const [renkler, setRenkler] = useState(baslangicDeger?.renkler ?? [{ ad: "", hex: "#000000" }]);
   const [urunId] = useState(() => baslangicDeger?.id ?? crypto.randomUUID());
@@ -251,7 +252,8 @@ export default function ProductForm({ baslangicDeger, onKaydet }: ProductFormPro
           id="kategori_id"
           name="kategori_id"
           required
-          defaultValue={baslangicDeger?.kategori_id ?? ""}
+          value={kategoriId}
+          onChange={(e) => setKategoriId(e.target.value)}
           className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
         >
           <option value="">Seçin</option>
